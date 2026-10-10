@@ -29,7 +29,8 @@ interface CircuitAnalysisPanelProps {
     nodeIds: string[],
     activeEdgeId?: string,
     activeNodeId?: string,
-    mode?: 'eulerian' | 'hamiltonian' | null
+    mode?: 'eulerian' | 'hamiltonian' | null,
+    activeFromNodeId?: string
   ) => void;
 }
 
@@ -77,6 +78,7 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
         steps: eulerian.detailedSteps.map(s => ({
           step: s.step,
           edgeId: s.edgeId,
+          fromNodeId: s.fromNodeId,
           nodeId: s.toNodeId,
           edgesSoFar: eulerian.pathEdges.slice(0, s.step),
           nodesSoFar: eulerian.pathNodes.slice(0, s.step + 1),
@@ -101,6 +103,7 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
         return {
           step: idx + 1,
           edgeId,
+          fromNodeId: fromId,
           nodeId: toId,
           edgesSoFar: chosen.edges.slice(0, idx + 1),
           nodesSoFar: chosen.nodes.slice(0, idx + 2),
@@ -149,7 +152,8 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
       stepObj.nodesSoFar,
       stepObj.edgeId,
       stepObj.nodeId,
-      activeTrace.mode
+      activeTrace.mode,
+      stepObj.fromNodeId
     );
   }, [currentStepIdx, activeTrace]);
 

@@ -65,6 +65,7 @@ export function App() {
   const [highlightedNodeIds, setHighlightedNodeIds] = useState<string[]>([]);
   const [activeStepEdgeId, setActiveStepEdgeId] = useState<string | undefined>(undefined);
   const [activeStepNodeId, setActiveStepNodeId] = useState<string | undefined>(undefined);
+  const [activeFromNodeId, setActiveFromNodeId] = useState<string | undefined>(undefined);
   const [playbackMode, setPlaybackMode] = useState<'eulerian' | 'hamiltonian' | null>(null);
 
   const quickImportInputRef = useRef<HTMLInputElement | null>(null);
@@ -433,12 +434,14 @@ export function App() {
       nodeIds: string[],
       activeEdge?: string,
       activeNode?: string,
-      mode?: 'eulerian' | 'hamiltonian' | null
+      mode?: 'eulerian' | 'hamiltonian' | null,
+      activeFromNode?: string
     ) => {
       setHighlightedEdgeIds(edgeIds);
       setHighlightedNodeIds(nodeIds);
       setActiveStepEdgeId(activeEdge);
       setActiveStepNodeId(activeNode);
+      setActiveFromNodeId(activeFromNode);
       setPlaybackMode(mode ?? null);
     },
     []
@@ -499,6 +502,7 @@ export function App() {
                   activeStepEdgeId={activeStepEdgeId}
                   highlightedNodeIds={highlightedNodeIds}
                   activeStepNodeId={activeStepNodeId}
+                  activeFromNodeId={activeFromNodeId}
                   playbackMode={playbackMode}
                 />
               </div>
@@ -619,6 +623,7 @@ export function App() {
                 activeStepEdgeId={activeStepEdgeId}
                 highlightedNodeIds={highlightedNodeIds}
                 activeStepNodeId={activeStepNodeId}
+                activeFromNodeId={activeFromNodeId}
                 playbackMode={playbackMode}
               />
             </div>

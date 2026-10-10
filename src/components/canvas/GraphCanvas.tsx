@@ -44,6 +44,7 @@ interface GraphCanvasProps {
   activeStepEdgeId?: string;
   highlightedNodeIds: string[];
   activeStepNodeId?: string;
+  activeFromNodeId?: string;
   playbackMode?: 'eulerian' | 'hamiltonian' | null;
 }
 
@@ -75,6 +76,7 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
   activeStepEdgeId,
   highlightedNodeIds,
   activeStepNodeId,
+  activeFromNodeId,
   playbackMode
 }) => {
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -172,6 +174,7 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
       string,
       {
         pathD: string;
+        reversedPathD: string;
         labelX: number;
         labelY: number;
         isSelfLoop: boolean;
@@ -179,6 +182,8 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
         uy: number;
         vx: number;
         vy: number;
+        midX: number;
+        midY: number;
       }
     >();
 
@@ -197,15 +202,21 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
           const pathD = `M ${x - 12} ${y + 4} C ${x - loopRadius * 1.4} ${
             y - loopRadius * 1.8
           }, ${x + loopRadius * 1.4} ${y - loopRadius * 1.8}, ${x + 12} ${y + 4}`;
+          const reversedPathD = `M ${x + 12} ${y + 4} C ${x + loopRadius * 1.4} ${
+            y - loopRadius * 1.8
+          }, ${x - loopRadius * 1.4} ${y - loopRadius * 1.8}, ${x - 12} ${y + 4}`;
           geom.set(edge.id, {
             pathD,
+            reversedPathD,
             labelX: x,
             labelY: y - loopRadius * 1.35,
             isSelfLoop: true,
             ux: u.x,
             uy: u.y,
             vx: v.x,
-            vy: v.y
+            vy: v.y,
+            midX: x,
+            midY: y - loopRadius * 1.8
           });
           return;
         }
@@ -237,7 +248,7 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
         const midX = (ux + vx) / 2 + nx * curveSpread;
         const midY = (uy + vy) / 2 + ny * curveSpread;
 
-        // Vector from control point to target v for accurate arrowhead termination
+        // Vector from control point to target v
         const toVdx = vx - midX;
         const toVdy = vy - midY;
         const toVDist = Math.max(1, Math.sqrt(toVdx * toVdx + toVdy * toVdy));
@@ -256,6 +267,11 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
             ? `M ${sourceStartX} ${sourceStartY} L ${targetEndX} ${targetEndY}`
             : `M ${sourceStartX} ${sourceStartY} Q ${midX} ${midY} ${targetEndX} ${targetEndY}`;
 
+        const reversedPathD =
+          count === 1
+            ? `M ${targetEndX} ${targetEndY} L ${sourceStartX} ${sourceStartY}`
+            : `M ${targetEndX} ${targetEndY} Q ${midX} ${midY} ${sourceStartX} ${sourceStartY}`;
+
         // Point on quadratic bezier at t = 0.5
         const labelX =
           count === 1
@@ -268,13 +284,16 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
 
         geom.set(edge.id, {
           pathD,
+          reversedPathD,
           labelX,
           labelY,
           isSelfLoop: false,
           ux: sourceStartX,
           uy: sourceStartY,
           vx: targetEndX,
-          vy: targetEndY
+          vy: targetEndY,
+          midX,
+          midY
         });
       });
     }
@@ -631,12 +650,44 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
             viewBox="0 0 10 10"
             refX="7"
             refY="5"
-            markerWidth="7"
-            markerHeight="7"
+            markerWidth="8"
+            markerHeight="8"
             orient="auto-start-reverse"
           >
             <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#22c55e" />
           </marker>
+
+          {/* Dynamic Walk Traversal Arrowhead Marker */}
+          <marker
+            id="arrow-walk-direction"
+            viewBox="0 0 10 10"
+            refX="7.5"
+            refY="5"
+            markerWidth="9"
+            markerHeight="9"
+            orient="auto"
+          >
+            <path d="M 0 1 L 9 5 L 0 9 z" fill="#4ade80" />
+          </marker>
+
+          {/* Intense Glow Filter for Active Traversal Edge */}
+          <filter id="walk-glow" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="4.5" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+
+          {/* Pulse Glow for Source Node */}
+          <filter id="source-glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="3.5" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
         </defs>
 
         {/* Background Grid Rect */}
@@ -668,6 +719,16 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
             const highlightOrderIndex = highlightedEdgeIds.indexOf(edge.id);
             const isHighlighted = highlightOrderIndex !== -1;
             const isActiveStep = activeStepEdgeId === edge.id;
+
+            // Determine traversal orientation for active step
+            // If activeFromNodeId is provided, check if edge is traversed in reverse of canonical (source -> target)
+            const isReversedTraversal =
+              isActiveStep &&
+              activeFromNodeId !== undefined &&
+              edge.target === activeFromNodeId &&
+              edge.source !== activeFromNodeId;
+
+            const activeTraversalD = isReversedTraversal ? geom.reversedPathD : geom.pathD;
 
             // Count all occurrences of this edge in highlightedEdgeIds
             const stepNumbers: number[] = [];
@@ -706,22 +767,22 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
                   d={geom.pathD}
                   fill="none"
                   stroke="transparent"
-                  strokeWidth={16}
+                  strokeWidth={18}
                 />
 
-                {/* Subtle outer glow when highlighted or active */}
-                {(isHighlighted || isActiveStep || isSelected) && (
+                {/* Outer Glow Halo for Selected or Highlighted Edges */}
+                {(isHighlighted || isSelected) && !isActiveStep && (
                   <path
                     d={geom.pathD}
                     fill="none"
-                    stroke={isActiveStep ? '#22c55e' : isHighlighted ? '#f6821f' : '#38bdf8'}
+                    stroke={isHighlighted ? '#f6821f' : '#38bdf8'}
                     strokeWidth={strokeWidth + 6}
                     strokeOpacity={0.2}
                     strokeLinecap="round"
                   />
                 )}
 
-                {/* Main Visible Edge Path */}
+                {/* Base Visible Edge Path */}
                 <path
                   d={geom.pathD}
                   fill="none"
@@ -732,37 +793,90 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
                   className="transition-colors duration-200 group-hover:stroke-zinc-300"
                 />
 
-                {/* Animated flow dashed overlay when active step */}
+                {/* ============================================================ */}
+                {/* ACTIVE WALK TRAVERSAL ANIMATION (Clear direction & beacon)   */}
+                {/* ============================================================ */}
                 {isActiveStep && (
-                  <path
-                    d={geom.pathD}
-                    fill="none"
-                    stroke="#bbf7d0"
-                    strokeWidth={2}
-                    strokeDasharray="6 6"
-                  >
-                    <animate
-                      attributeName="stroke-dashoffset"
-                      from="24"
-                      to="0"
-                      dur="0.6s"
-                      repeatCount="indefinite"
+                  <g className="pointer-events-none">
+                    {/* 1. High-intensity neon green under-glow */}
+                    <path
+                      d={activeTraversalD}
+                      fill="none"
+                      stroke="#22c55e"
+                      strokeWidth={10}
+                      strokeOpacity={0.4}
+                      strokeLinecap="round"
+                      filter="url(#walk-glow)"
                     />
-                  </path>
+
+                    {/* 2. Primary active walk body */}
+                    <path
+                      d={activeTraversalD}
+                      fill="none"
+                      stroke="#4ade80"
+                      strokeWidth={4.5}
+                      strokeLinecap="round"
+                    />
+
+                    {/* 3. Directional animated chevron dash stream */}
+                    <path
+                      d={activeTraversalD}
+                      fill="none"
+                      stroke="#ffffff"
+                      strokeWidth={2.8}
+                      strokeDasharray="8 8"
+                      strokeLinecap="round"
+                    >
+                      <animate
+                        attributeName="stroke-dashoffset"
+                        from="32"
+                        to="0"
+                        dur="0.55s"
+                        repeatCount="indefinite"
+                      />
+                    </path>
+
+                    {/* 4. Directional Arrowhead showing exact traversal flow */}
+                    <path
+                      d={activeTraversalD}
+                      fill="none"
+                      stroke="transparent"
+                      strokeWidth={1}
+                      markerEnd="url(#arrow-walk-direction)"
+                    />
+
+                    {/* 5. Glowing particle packet travelling along edge from source to target */}
+                    <circle r={6} fill="#ffffff" filter="url(#walk-glow)">
+                      <animateMotion
+                        path={activeTraversalD}
+                        dur="0.85s"
+                        repeatCount="indefinite"
+                        rotate="auto"
+                      />
+                    </circle>
+                    <circle r={3.5} fill="#22c55e">
+                      <animateMotion
+                        path={activeTraversalD}
+                        dur="0.85s"
+                        repeatCount="indefinite"
+                        rotate="auto"
+                      />
+                    </circle>
+                  </g>
                 )}
 
                 {/* Edge Label / Weight or Step Order Pill */}
                 {(edge.label || edge.weight !== undefined || stepNumbers.length > 0) && (
                   <g transform={`translate(${geom.labelX}, ${geom.labelY})`}>
                     <rect
-                      x={-22}
-                      y={-11}
-                      width={44}
-                      height={22}
+                      x={-24}
+                      y={-12}
+                      width={48}
+                      height={24}
                       rx={6}
                       fill={
                         isActiveStep
-                          ? '#14532d'
+                          ? '#052e16'
                           : isHighlighted
                           ? '#431407'
                           : '#18181b'
@@ -776,12 +890,12 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
                           ? '#38bdf8'
                           : '#27272a'
                       }
-                      strokeWidth={1.2}
+                      strokeWidth={isActiveStep ? 2 : 1.2}
                     />
                     <text
                       textAnchor="middle"
                       dominantBaseline="central"
-                      className={`text-[10px] font-mono font-semibold ${
+                      className={`text-[10px] font-mono font-bold ${
                         isActiveStep
                           ? 'fill-emerald-300'
                           : isHighlighted
@@ -804,7 +918,8 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
             const isSelected = selectedNodeId === node.id;
             const isConnectingSource = connectingSourceId === node.id;
             const isHighlighted = highlightedNodeIds.includes(node.id);
-            const isActiveStep = activeStepNodeId === node.id;
+            const isActiveStepTarget = activeStepNodeId === node.id;
+            const isActiveStepSource = activeFromNodeId === node.id;
             const deg = degreeInfo[node.id] || {
               inDegree: 0,
               outDegree: 0,
@@ -822,8 +937,8 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
                 onClick={e => handleNodeClick(e, node.id)}
                 className="cursor-pointer group"
               >
-                {/* Active Step Radar Pulse */}
-                {isActiveStep && (
+                {/* Active Walk TARGET Radar Pulse (Neon Green) */}
+                {isActiveStepTarget && (
                   <circle
                     r={34}
                     fill="none"
@@ -834,27 +949,47 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
                     <animate
                       attributeName="r"
                       from="24"
-                      to="42"
-                      dur="1.2s"
+                      to="44"
+                      dur="1.1s"
                       repeatCount="indefinite"
                     />
                     <animate
                       attributeName="stroke-opacity"
-                      from="0.8"
+                      from="0.9"
                       to="0"
-                      dur="1.2s"
+                      dur="1.1s"
+                      repeatCount="indefinite"
+                    />
+                  </circle>
+                )}
+
+                {/* Active Walk SOURCE Halo (Pulsing Amber) */}
+                {isActiveStepSource && !isActiveStepTarget && (
+                  <circle
+                    r={32}
+                    fill="none"
+                    stroke="#f59e0b"
+                    strokeWidth={2}
+                    strokeDasharray="4 3"
+                    strokeOpacity={0.8}
+                  >
+                    <animate
+                      attributeName="stroke-dashoffset"
+                      from="0"
+                      to="14"
+                      dur="1s"
                       repeatCount="indefinite"
                     />
                   </circle>
                 )}
 
                 {/* Highlight / Selection Halo */}
-                {(isSelected || isConnectingSource || isHighlighted || isActiveStep) && (
+                {(isSelected || isConnectingSource || isHighlighted || isActiveStepTarget) && (
                   <circle
                     r={29}
                     fill="none"
                     stroke={
-                      isActiveStep
+                      isActiveStepTarget
                         ? '#22c55e'
                         : isConnectingSource || isHighlighted
                         ? '#f6821f'
@@ -870,15 +1005,21 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
                   r={24}
                   fill="#141517"
                   stroke={
-                    isActiveStep
+                    isActiveStepTarget
                       ? '#22c55e'
+                      : isActiveStepSource
+                      ? '#f59e0b'
                       : isHighlighted
                       ? '#f6821f'
                       : isSelected
                       ? '#38bdf8'
                       : baseColor
                   }
-                  strokeWidth={isSelected || isHighlighted || isActiveStep ? 3 : 2.2}
+                  strokeWidth={
+                    isSelected || isHighlighted || isActiveStepTarget || isActiveStepSource
+                      ? 3
+                      : 2.2
+                  }
                   className="transition-transform duration-150 group-hover:scale-105"
                 />
 
@@ -886,13 +1027,23 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
                 <circle
                   r={21}
                   fill={
-                    isActiveStep
+                    isActiveStepTarget
                       ? '#22c55e'
+                      : isActiveStepSource
+                      ? '#f59e0b'
                       : isHighlighted
                       ? '#f6821f'
                       : baseColor
                   }
-                  fillOpacity={isActiveStep ? 0.28 : isHighlighted ? 0.22 : 0.14}
+                  fillOpacity={
+                    isActiveStepTarget
+                      ? 0.28
+                      : isActiveStepSource
+                      ? 0.2
+                      : isHighlighted
+                      ? 0.22
+                      : 0.14
+                  }
                 />
 
                 {/* Short ID inside Vertex */}
@@ -903,6 +1054,31 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
                 >
                   {node.id.length > 5 ? node.id.slice(0, 5) : node.id}
                 </text>
+
+                {/* Live Traversal Role Pill (FROM / TO) */}
+                {(isActiveStepSource || isActiveStepTarget) && (
+                  <g transform="translate(0, -32)" className="pointer-events-none">
+                    <rect
+                      x={-22}
+                      y={-8}
+                      width={44}
+                      height={16}
+                      rx={4}
+                      fill={isActiveStepTarget ? '#052e16' : '#451a03'}
+                      stroke={isActiveStepTarget ? '#22c55e' : '#f59e0b'}
+                      strokeWidth={1.2}
+                    />
+                    <text
+                      textAnchor="middle"
+                      dominantBaseline="central"
+                      className={`text-[9px] font-mono font-bold ${
+                        isActiveStepTarget ? 'fill-emerald-300' : 'fill-amber-300'
+                      }`}
+                    >
+                      {isActiveStepTarget ? '→ TO' : 'FROM'}
+                    </text>
+                  </g>
+                )}
 
                 {/* Full Vertex Label Pill Below */}
                 <g transform="translate(0, 36)" className="pointer-events-none">
