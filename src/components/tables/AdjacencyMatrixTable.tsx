@@ -161,6 +161,10 @@ export const AdjacencyMatrixTable: React.FC<AdjacencyMatrixTableProps> = ({
                   <tr key={rowNode.id}>
                     <td className="sticky left-0 z-10 bg-zinc-900 border border-zinc-800 px-2 py-1 text-zinc-200">
                       <div className="flex items-center gap-1.5">
+                        <span
+                          className="w-2 h-2 rounded-full inline-block shrink-0"
+                          style={{ backgroundColor: rowNode.color || '#3b82f6' }}
+                        />
                         <span className="font-bold">{rowNode.id}</span>
                         <input
                           type="text"
@@ -172,9 +176,22 @@ export const AdjacencyMatrixTable: React.FC<AdjacencyMatrixTableProps> = ({
                     </td>
 
                     {nodes.map(colNode => {
-                      const cell = matrix[rowNode.id]?.[colNode.id] || { count: 0 };
+                      const cell = matrix[rowNode.id]?.[colNode.id] || { count: 0, hasDirected: false, hasUndirected: false };
                       const isHovered =
                         hoveredCell?.row === rowNode.id && hoveredCell?.col === colNode.id;
+
+                      let cellStyle = 'bg-zinc-950/40 text-zinc-600';
+                      if (cell.count > 0) {
+                        if (cell.hasDirected && cell.hasUndirected) {
+                          cellStyle = 'bg-indigo-950/60 text-indigo-300 font-bold border-indigo-900/50';
+                        } else if (cell.hasDirected) {
+                          cellStyle = 'bg-sky-950/60 text-sky-300 font-bold border-sky-900/50';
+                        } else {
+                          cellStyle = 'bg-emerald-950/60 text-emerald-300 font-bold border-emerald-900/50';
+                        }
+                      } else if (isHovered) {
+                        cellStyle = 'bg-zinc-800/40 text-zinc-400';
+                      }
 
                       return (
                         <td
@@ -185,13 +202,7 @@ export const AdjacencyMatrixTable: React.FC<AdjacencyMatrixTableProps> = ({
                           onMouseLeave={() => setHoveredCell(null)}
                           onClick={e => handleCellClick(rowNode.id, colNode.id, e)}
                           onContextMenu={e => handleCellContextMenu(rowNode.id, colNode.id, e)}
-                          className={`border border-zinc-800 text-center cursor-pointer select-none py-1.5 ${
-                            cell.count > 0
-                              ? 'bg-zinc-800 text-zinc-100 font-bold'
-                              : isHovered
-                              ? 'bg-zinc-800/40 text-zinc-400'
-                              : 'bg-zinc-950/40 text-zinc-600'
-                          }`}
+                          className={`border border-zinc-800 text-center cursor-pointer select-none py-1.5 transition-colors ${cellStyle}`}
                         >
                           {cell.count}
                         </td>

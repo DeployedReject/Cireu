@@ -174,7 +174,11 @@ export const EdgeListTable: React.FC<EdgeListTableProps> = ({
                 <td className="py-1 px-2 text-center">
                   <button
                     onClick={() => onUpdateEdge(edge.id, { directed: !edge.directed })}
-                    className="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 text-[11px]"
+                    className={`px-1.5 py-0.5 rounded text-[11px] font-bold border transition-colors ${
+                      edge.directed
+                        ? 'bg-sky-950/60 text-sky-300 border-sky-900/50'
+                        : 'bg-emerald-950/60 text-emerald-300 border-emerald-900/50'
+                    }`}
                   >
                     {edge.directed ? '→' : '—'}
                   </button>

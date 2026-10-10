@@ -170,8 +170,14 @@ export const IncidenceTable: React.FC<IncidenceTableProps> = ({
                 return (
                   <tr key={node.id}>
                     <td className="sticky left-0 z-10 bg-zinc-900 border border-zinc-800 px-2 py-1 text-zinc-200">
-                      <span className="font-bold">{node.id}</span>
-                      <span className="text-zinc-500 text-[11px] ml-1.5">{node.label}</span>
+                      <div className="flex items-center gap-1.5">
+                        <span
+                          className="w-2 h-2 rounded-full inline-block shrink-0"
+                          style={{ backgroundColor: node.color || '#3b82f6' }}
+                        />
+                        <span className="font-bold">{node.id}</span>
+                        <span className="text-zinc-500 text-[11px] ml-1">{node.label}</span>
+                      </div>
                     </td>
 
                     {edges.map(edge => {
@@ -185,21 +191,21 @@ export const IncidenceTable: React.FC<IncidenceTableProps> = ({
                       if (!edge.directed) {
                         if (isSelfLoop) {
                           cellValue = '2';
-                          cellClass = 'bg-zinc-800 text-zinc-100 font-bold';
+                          cellClass = 'bg-purple-950/60 text-purple-300 font-bold border-purple-900/50';
                         } else if (isSource || isTarget) {
                           cellValue = '1';
-                          cellClass = 'bg-zinc-800 text-zinc-100 font-bold';
+                          cellClass = 'bg-emerald-950/60 text-emerald-300 font-bold border-emerald-900/50';
                         }
                       } else {
                         if (isSelfLoop) {
                           cellValue = '±1';
-                          cellClass = 'bg-zinc-800 text-zinc-100 font-bold';
+                          cellClass = 'bg-purple-950/60 text-purple-300 font-bold border-purple-900/50';
                         } else if (isSource) {
                           cellValue = '+1';
-                          cellClass = 'bg-zinc-800 text-zinc-100 font-bold';
+                          cellClass = 'bg-sky-950/60 text-sky-300 font-bold border-sky-900/50';
                         } else if (isTarget) {
                           cellValue = '−1';
-                          cellClass = 'bg-zinc-800 text-zinc-100 font-bold';
+                          cellClass = 'bg-amber-950/60 text-amber-300 font-bold border-amber-900/50';
                         }
                       }
 
@@ -211,7 +217,7 @@ export const IncidenceTable: React.FC<IncidenceTableProps> = ({
                           }
                           onMouseLeave={() => setHoveredCell(null)}
                           onClick={() => handleCellClick(node.id, edge)}
-                          className={`border border-zinc-800 text-center cursor-pointer select-none py-1.5 ${cellClass}`}
+                          className={`border border-zinc-800 text-center cursor-pointer select-none py-1.5 transition-colors ${cellClass}`}
                         >
                           {cellValue}
                         </td>
