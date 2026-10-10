@@ -76,7 +76,7 @@ export const AdjacencyMatrixTable: React.FC<AdjacencyMatrixTableProps> = ({
   return (
     <div className="flex flex-col h-full bg-white text-gray-800 text-xs overflow-hidden font-sans">
       {/* Normal Toolbar */}
-      <div className="flex items-center justify-between gap-2 px-3 py-1.5 border-b border-gray-300 bg-gray-100">
+      <div className="flex items-center justify-between gap-2 px-3 py-1.5 border-b border-gray-300 bg-orange-500">
         <span className="font-mono font-bold text-gray-700">A[u, v] (Adjacency Matrix)</span>
 
         <div className="flex items-center gap-1.5">
@@ -101,14 +101,14 @@ export const AdjacencyMatrixTable: React.FC<AdjacencyMatrixTableProps> = ({
 
           <button
             onClick={onAddNode}
-            className="px-2 py-0.5 bg-gray-100 hover:bg-white text-gray-800 border border-gray-400 shadow-sm"
+            className="px-2 py-0.5 bg-orange-500 hover:bg-white text-gray-800 border border-gray-400 shadow-sm"
           >
             + Vertex
           </button>
 
           <button
             onClick={onClearAllEdges}
-            className="px-2 py-0.5 bg-gray-100 hover:bg-white text-gray-700 border border-gray-400 shadow-sm"
+            className="px-2 py-0.5 bg-orange-500 hover:bg-white text-gray-700 border border-gray-400 shadow-sm"
           >
             Clear Edges
           </button>
@@ -151,7 +151,7 @@ export const AdjacencyMatrixTable: React.FC<AdjacencyMatrixTableProps> = ({
 
                 return (
                   <tr key={rowNode.id}>
-                    <td className="sticky left-0 z-10 bg-gray-100 border border-gray-400 px-2 py-1 text-gray-900">
+                    <td className="sticky left-0 z-10 bg-orange-500 border border-gray-400 px-2 py-1 text-gray-900">
                       <div className="flex items-center gap-1.5">
                         <span
                           className="w-2.5 h-2.5 border border-gray-400 inline-block shrink-0"
@@ -182,7 +182,7 @@ export const AdjacencyMatrixTable: React.FC<AdjacencyMatrixTableProps> = ({
                           cellStyle = 'bg-green-100 text-green-900 font-bold';
                         }
                       } else if (isHovered) {
-                        cellStyle = 'bg-gray-100 text-gray-700';
+                        cellStyle = 'bg-orange-500 text-gray-700';
                       }
 
                       return (

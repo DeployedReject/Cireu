@@ -68,7 +68,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         <button
           onClick={onCreateNewGraph}
-          className="px-2 py-0.5 text-xs bg-gray-100 hover:bg-white text-gray-800 border border-gray-400 shadow-sm"
+          className="px-2 py-0.5 text-xs bg-orange-500 hover:bg-white text-gray-800 border border-gray-400 shadow-sm"
           title="Create New Graph"
         >
           + New
@@ -86,7 +86,7 @@ export const Header: React.FC<HeaderProps> = ({
               className={`px-2 py-0.5 text-xs ${
                 active
                   ? 'bg-white text-gray-900 font-bold border-r border-gray-400 last:border-r-0'
-                  : 'text-gray-700 hover:bg-gray-100 border-r border-gray-300 last:border-r-0'
+                  : 'text-gray-700 hover:bg-orange-500 border-r border-gray-300 last:border-r-0'
               }`}
             >
               {mode.label}
@@ -99,14 +99,14 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="flex items-center gap-1.5">
         <button
           onClick={onOpenLibraryModal}
-          className="px-2 py-0.5 text-xs bg-gray-100 hover:bg-white text-gray-800 border border-gray-400 shadow-sm"
+          className="px-2 py-0.5 text-xs bg-orange-500 hover:bg-white text-gray-800 border border-gray-400 shadow-sm"
         >
           Saved ({savedGraphs.length})
         </button>
 
         <button
           onClick={onExportAll}
-          className="px-2 py-0.5 text-xs bg-gray-100 hover:bg-white text-gray-800 border border-gray-400 shadow-sm"
+          className="px-2 py-0.5 text-xs bg-orange-500 hover:bg-white text-gray-800 border border-gray-400 shadow-sm"
           title="Export JSON"
         >
           Export

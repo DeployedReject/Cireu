@@ -174,7 +174,7 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
               className={`flex-1 py-1.5 text-center text-xs border-r border-gray-300 last:border-r-0 ${
                 active
                   ? 'bg-white text-gray-900 font-bold border-t-2 border-t-blue-600'
-                  : 'text-gray-700 hover:bg-gray-100'
+                  : 'text-gray-700 hover:bg-orange-500'
               }`}
             >
               {tab.label}
@@ -202,7 +202,7 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
                   setCurrentStepIdx(i => Math.max(0, i - 1));
                 }}
                 disabled={currentStepIdx <= 0}
-                className="p-1 bg-gray-100 hover:bg-white disabled:opacity-40 text-gray-700 border border-gray-400"
+                className="p-1 bg-orange-500 hover:bg-white disabled:opacity-40 text-gray-700 border border-gray-400"
                 title="Previous Step"
               >
                 <SkipBack className="w-3.5 h-3.5" />
@@ -214,7 +214,7 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
                   setCurrentStepIdx(i => Math.min(activeTrace.steps.length - 1, i + 1));
                 }}
                 disabled={currentStepIdx >= activeTrace.steps.length - 1}
-                className="p-1 bg-gray-100 hover:bg-white disabled:opacity-40 text-gray-700 border border-gray-400"
+                className="p-1 bg-orange-500 hover:bg-white disabled:opacity-40 text-gray-700 border border-gray-400"
                 title="Next Step"
               >
                 <SkipForward className="w-3.5 h-3.5" />
@@ -222,7 +222,7 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
 
               <button
                 onClick={handleResetPlayback}
-                className="p-1 bg-gray-100 hover:bg-white text-gray-700 border border-gray-400"
+                className="p-1 bg-orange-500 hover:bg-white text-gray-700 border border-gray-400"
                 title="Reset"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
@@ -238,7 +238,7 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
                   key={s.label}
                   onClick={() => setSpeedMs(s.ms)}
                   className={`px-1.5 py-0.5 border border-gray-400 ${
-                    speedMs === s.ms ? 'bg-white text-gray-900 font-bold' : 'bg-gray-100 text-gray-600 hover:bg-white'
+                    speedMs === s.ms ? 'bg-white text-gray-900 font-bold' : 'bg-orange-500 text-gray-600 hover:bg-white'
                   }`}
                 >
                   {s.label}
@@ -295,7 +295,7 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
                   ? 'bg-green-50 border-green-300 text-green-900'
                   : eulerian.hasEulerianPath
                   ? 'bg-blue-50 border-blue-300 text-blue-900'
-                  : 'bg-gray-100 border-gray-300 text-gray-800'
+                  : 'bg-orange-500 border-gray-300 text-gray-800'
               }`}
             >
               <div className="font-bold mb-1 flex items-center gap-1.5">
@@ -334,7 +334,7 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
                       className={`px-1.5 py-0.5 border text-[11px] ${
                         currentStepIdx >= 0 && idx === currentStepIdx + 1
                           ? 'bg-green-600 text-white font-bold border-green-700'
-                          : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-100'
+                          : 'bg-white text-gray-800 border-gray-300 hover:bg-orange-500'
                       }`}
                     >
                       {nodeId}
@@ -382,7 +382,7 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
                   ? 'bg-green-50 border-green-300 text-green-900'
                   : hamiltonian.hasHamiltonianPath
                   ? 'bg-blue-50 border-blue-300 text-blue-900'
-                  : 'bg-gray-100 border-gray-300 text-gray-800'
+                  : 'bg-orange-500 border-gray-300 text-gray-800'
               }`}
             >
               <div className="font-bold mb-1 flex items-center gap-1.5">
@@ -445,7 +445,7 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
                     className={`flex-1 py-1 text-xs border ${
                       hamVariantType === 'circuit'
                         ? 'bg-white border-gray-400 text-gray-900 font-bold'
-                        : 'bg-gray-100 border-gray-300 text-gray-600 hover:bg-white disabled:opacity-40'
+                        : 'bg-orange-500 border-gray-300 text-gray-600 hover:bg-white disabled:opacity-40'
                     }`}
                   >
                     Circuits ({hamiltonian.circuits.length})
@@ -459,7 +459,7 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
                     className={`flex-1 py-1 text-xs border ${
                       hamVariantType === 'path'
                         ? 'bg-white border-gray-400 text-gray-900 font-bold'
-                        : 'bg-gray-100 border-gray-300 text-gray-600 hover:bg-white disabled:opacity-40'
+                        : 'bg-orange-500 border-gray-300 text-gray-600 hover:bg-white disabled:opacity-40'
                     }`}
                   >
                     Paths ({hamiltonian.paths.length})
@@ -497,7 +497,7 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
           <div className="space-y-2">
             <table className="w-full text-left border-collapse font-mono text-[11px]">
               <thead>
-                <tr className="border-b border-gray-300 text-gray-600 bg-gray-100 font-bold">
+                <tr className="border-b border-gray-300 text-gray-600 bg-orange-500 font-bold">
                   <th className="py-1 px-1">Node</th>
                   <th className="py-1 text-center">In</th>
                   <th className="py-1 text-center">Out</th>

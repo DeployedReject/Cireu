@@ -61,13 +61,13 @@ export const IncidenceTable: React.FC<IncidenceTableProps> = ({
   return (
     <div className="flex flex-col h-full bg-white text-gray-800 text-xs overflow-hidden font-sans">
       {/* Normal Toolbar */}
-      <div className="flex items-center justify-between gap-2 px-3 py-1.5 border-b border-gray-300 bg-gray-100">
+      <div className="flex items-center justify-between gap-2 px-3 py-1.5 border-b border-gray-300 bg-orange-500">
         <span className="font-mono font-bold text-gray-700">B[v, e] (Incidence Matrix)</span>
 
         <button
           onClick={handleAddNewEdge}
           disabled={nodes.length === 0}
-          className="px-2 py-0.5 bg-gray-100 hover:bg-white disabled:opacity-40 text-gray-800 border border-gray-400 shadow-sm"
+          className="px-2 py-0.5 bg-orange-500 hover:bg-white disabled:opacity-40 text-gray-800 border border-gray-400 shadow-sm"
         >
           + Edge Column
         </button>
@@ -106,7 +106,7 @@ export const IncidenceTable: React.FC<IncidenceTableProps> = ({
                         onSelectEdge?.(null);
                       }}
                       className={`sticky top-0 z-10 border border-gray-400 px-2 py-1 text-center min-w-[54px] font-normal ${
-                        isEdgeHovered ? 'bg-gray-100 text-gray-900' : 'bg-gray-200 text-gray-800'
+                        isEdgeHovered ? 'bg-orange-500 text-gray-900' : 'bg-gray-200 text-gray-800'
                       }`}
                     >
                       <div className="flex flex-col items-center gap-0.5">
@@ -159,7 +159,7 @@ export const IncidenceTable: React.FC<IncidenceTableProps> = ({
 
                 return (
                   <tr key={node.id}>
-                    <td className="sticky left-0 z-10 bg-gray-100 border border-gray-400 px-2 py-1 text-gray-900">
+                    <td className="sticky left-0 z-10 bg-orange-500 border border-gray-400 px-2 py-1 text-gray-900">
                       <div className="flex items-center gap-1.5">
                         <span
                           className="w-2.5 h-2.5 border border-gray-400 inline-block shrink-0"

@@ -353,7 +353,7 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
   ];
 
   return (
-    <div className="relative w-full h-full flex flex-col bg-gray-100 overflow-hidden select-none font-sans">
+    <div className="relative w-full h-full flex flex-col bg-orange-500 overflow-hidden select-none font-sans">
       {/* Normal Grey Toolbar */}
       <div className="absolute top-2 left-2 right-2 z-20 flex items-center justify-between gap-2 pointer-events-none">
         {/* Left: Tools */}
@@ -364,7 +364,7 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
             <button
               key={tool.id}
               onClick={() => setActiveTool(tool.id)}
-              className={`px-2 py-1 text-xs border-r border-gray-300 last:border-r-0 ${isActive ? 'bg-white text-gray-900 font-bold' : 'bg-gray-100 text-gray-700'}`}
+              className={`px-2 py-1 text-xs border-r border-gray-300 last:border-r-0 ${isActive ? 'bg-white text-gray-900 font-bold' : 'bg-orange-500 text-gray-700'}`}
             >
               {tool.label}
             </button>
@@ -378,43 +378,43 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
       <div className="flex items-center gap-1 pointer-events-auto">
         <button
           onClick={() => handleAutoLayout('circle')}
-          className="px-2 py-1 text-xs bg-gray-100 border border-gray-400"
+          px-2 py-1 text-xs bg-orange-500 text-white border border-gray-400
         >
           Circle
         </button>
         <button
           onClick={() => handleAutoLayout('force')}
-          className="px-2 py-1 text-xs bg-gray-100 border border-gray-400"
+          px-2 py-1 text-xs bg-orange-500 text-white border border-gray-400
         >
           Force
         </button>
         <button
           onClick={() => handleAutoLayout('grid')}
-          className="px-2 py-1 text-xs bg-gray-100 border border-gray-400"
+          px-2 py-1 text-xs bg-orange-500 text-white border border-gray-400
         >
           Grid
         </button>
         <button
           onClick={() => setSnapToGrid(s => !s)}
-          className="px-2 py-1 text-xs bg-gray-100 border border-gray-400"
+          px-2 py-1 text-xs bg-orange-500 text-white border border-gray-400
         >
           {snapToGrid ? 'Snap On' : 'Snap Off'}
         </button>
         <button
           onClick={() => setShowDegreesOnCanvas(d => !d)}
-          className="px-2 py-1 text-xs bg-gray-100 border border-gray-400"
+          px-2 py-1 text-xs bg-orange-500 text-white border border-gray-400
         >
           {showDegreesOnCanvas ? 'Deg On' : 'Deg Off'}
         </button>
         <button
           onClick={() => setZoom(z => Math.max(0.4, +(z - 0.15).toFixed(2)))}
-          className="px-2 py-1 text-xs bg-gray-100 border border-gray-400"
+          px-2 py-1 text-xs bg-orange-500 text-white border border-gray-400
         >
           -
         </button>
         <button
           onClick={() => setZoom(z => Math.min(2.2, +(z + 0.15).toFixed(2)))}
-          className="px-2 py-1 text-xs bg-gray-100 border border-gray-400"
+          px-2 py-1 text-xs bg-orange-500 text-white border border-gray-400
         >
           +
         </button>
@@ -423,7 +423,7 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
             setPan({ x: 0, y: 0 });
             setZoom(1);
           }}
-          className="px-2 py-1 text-xs bg-gray-100 border border-gray-400"
+          px-2 py-1 text-xs bg-orange-500 text-white border border-gray-400
         >
           Reset
         </button>
@@ -753,7 +753,7 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
                   onDeleteNode(selectedNode.id);
                   setSelectedNodeId(null);
                 }}
-                className="px-2 py-0.5 bg-gray-100 hover:bg-red-100 hover:text-red-700 text-gray-700 text-xs border border-gray-400"
+                className="px-2 py-0.5 bg-orange-500 hover:bg-red-100 hover:text-red-700 text-gray-700 text-xs border border-gray-400"
               >
                 Delete
               </button>
@@ -776,7 +776,7 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
                 onClick={() =>
                   onUpdateEdge(selectedEdge.id, { directed: !selectedEdge.directed })
                 }
-                className="px-2 py-0.5 bg-gray-100 hover:bg-white text-xs text-gray-800 border border-gray-400"
+                className="px-2 py-0.5 bg-orange-500 hover:bg-white text-xs text-gray-800 border border-gray-400"
               >
                 {selectedEdge.directed ? 'Directed' : 'Undirected'}
               </button>
@@ -785,7 +785,7 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
                   onDeleteEdge(selectedEdge.id);
                   setSelectedEdgeId(null);
                 }}
-                className="px-2 py-0.5 bg-gray-100 hover:bg-red-100 hover:text-red-700 text-gray-700 text-xs border border-gray-400"
+                className="px-2 py-0.5 bg-orange-500 hover:bg-red-100 hover:text-red-700 text-gray-700 text-xs border border-gray-400"
               >
                 Delete
               </button>

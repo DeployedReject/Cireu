@@ -40,25 +40,25 @@ export const EdgeListTable: React.FC<EdgeListTableProps> = ({
   return (
     <div className="flex flex-col h-full bg-white text-gray-800 text-xs overflow-hidden font-sans">
       {/* Normal Top Bar */}
-      <div className="flex items-center justify-between gap-2 px-3 py-1.5 border-b border-gray-300 bg-gray-100">
+      <div className="flex items-center justify-between gap-2 px-3 py-1.5 border-b border-gray-300 bg-orange-500">
         <span className="font-mono font-bold text-gray-700">Edges ({edges.length})</span>
 
         <div className="flex items-center gap-1">
           <button
             onClick={() => onConvertAllEdgesDirection(false)}
-            className="px-2 py-0.5 bg-gray-100 hover:bg-white text-gray-700 border border-gray-400 shadow-sm"
+            className="px-2 py-0.5 bg-orange-500 hover:bg-white text-gray-700 border border-gray-400 shadow-sm"
           >
             All Undirected
           </button>
           <button
             onClick={() => onConvertAllEdgesDirection(true)}
-            className="px-2 py-0.5 bg-gray-100 hover:bg-white text-gray-700 border border-gray-400 shadow-sm"
+            className="px-2 py-0.5 bg-orange-500 hover:bg-white text-gray-700 border border-gray-400 shadow-sm"
           >
             All Directed
           </button>
           <button
             onClick={() => setShowBulkParser(s => !s)}
-            className="px-2 py-0.5 bg-gray-100 hover:bg-white text-gray-700 border border-gray-400 shadow-sm"
+            className="px-2 py-0.5 bg-orange-500 hover:bg-white text-gray-700 border border-gray-400 shadow-sm"
           >
             {showBulkParser ? 'Hide Bulk' : 'Bulk Text'}
           </button>
@@ -140,7 +140,7 @@ export const EdgeListTable: React.FC<EdgeListTableProps> = ({
       <div className="flex-1 overflow-auto">
         <table className="w-full text-left border-collapse font-mono text-xs">
           <thead>
-            <tr className="border-b border-gray-300 bg-gray-100 text-gray-600 font-bold">
+            <tr className="border-b border-gray-300 bg-orange-500 text-gray-600 font-bold">
               <th className="py-1 px-3">#</th>
               <th className="py-1 px-2">Source</th>
               <th className="py-1 px-2 text-center">Type</th>

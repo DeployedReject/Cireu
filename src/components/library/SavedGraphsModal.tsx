@@ -63,7 +63,7 @@ export const SavedGraphsModal: React.FC<SavedGraphsModalProps> = ({
         </div>
 
         {/* Toolbar */}
-        <div className="flex items-center justify-between px-3 py-1.5 border-b border-gray-300 bg-gray-100">
+        <div className="flex items-center justify-between px-3 py-1.5 border-b border-gray-300 bg-orange-500">
           <button
             onClick={() => {
               onCreateNewGraph();
@@ -84,13 +84,13 @@ export const SavedGraphsModal: React.FC<SavedGraphsModalProps> = ({
             />
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="px-2 py-0.5 bg-gray-100 hover:bg-white text-gray-800 border border-gray-400"
+              className="px-2 py-0.5 bg-orange-500 hover:bg-white text-gray-800 border border-gray-400"
             >
               Import JSON
             </button>
             <button
               onClick={onExportAll}
-              className="px-2 py-0.5 bg-gray-100 hover:bg-white text-gray-800 border border-gray-400"
+              className="px-2 py-0.5 bg-orange-500 hover:bg-white text-gray-800 border border-gray-400"
             >
               Export All
             </button>
@@ -135,7 +135,7 @@ export const SavedGraphsModal: React.FC<SavedGraphsModalProps> = ({
                   <button
                     onClick={() => onExportSingle(g)}
                     title="Export as JSON"
-                    className="px-2 py-0.5 bg-gray-100 hover:bg-white text-gray-700 text-[11px] border border-gray-400"
+                    className="px-2 py-0.5 bg-orange-500 hover:bg-white text-gray-700 text-[11px] border border-gray-400"
                   >
                     Export
                   </button>
@@ -148,7 +148,7 @@ export const SavedGraphsModal: React.FC<SavedGraphsModalProps> = ({
                     className={`px-2 py-0.5 text-[11px] font-bold border ${
                       isActive
                         ? 'bg-blue-600 text-white border-blue-700'
-                        : 'bg-gray-100 hover:bg-white text-gray-800 border-gray-400'
+                        : 'bg-orange-500 hover:bg-white text-gray-800 border-gray-400'
                     }`}
                   >
                     {isActive ? 'Loaded' : 'Load'}
