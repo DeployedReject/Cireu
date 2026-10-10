@@ -514,11 +514,11 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
             viewBox="0 0 10 10"
             refX="7.5"
             refY="5"
-            markerWidth="7"
-            markerHeight="7"
+            markerWidth="8"
+            markerHeight="8"
             orient="auto"
           >
-            <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#22c55e" />
+            <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#10b981" className="animate-arrow-nudge" />
           </marker>
         </defs>
 
@@ -599,6 +599,18 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
                   strokeLinecap="round"
                 />
 
+                {/* Animated dash flow along the active traversal edge */}
+                {isActiveStep && (
+                  <path
+                    d={edgePath}
+                    fill="none"
+                    stroke="#34d399"
+                    strokeWidth={strokeWidth}
+                    className="animate-edge-flow pointer-events-none"
+                    strokeLinecap="round"
+                  />
+                )}
+
                 {(edge.label || stepNumbers.length > 0) && (
                   <g transform={`translate(${geom.labelX}, ${geom.labelY})`}>
                     <rect
@@ -664,10 +676,10 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
                 onClick={e => handleNodeClick(e, node.id)}
                 className="cursor-pointer"
               >
-                {/* Clean Flat Node Circle */}
+                {/* Node Circle with distinct color */}
                 <circle
                   r={22}
-                  fill="#18181b"
+                  fill={node.color ? `${node.color}22` : '#18181b'}
                   stroke={strokeColor}
                   strokeWidth={strokeWidth}
                 />
@@ -750,8 +762,21 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
                 type="text"
                 value={selectedNode.label}
                 onChange={e => onUpdateNode(selectedNode.id, { label: e.target.value })}
-                className="px-2 py-0.5 rounded bg-zinc-950 border border-zinc-700 text-xs text-zinc-200 focus:outline-none w-32"
+                className="px-2 py-0.5 rounded bg-zinc-950 border border-zinc-700 text-xs text-zinc-200 focus:outline-none w-28"
               />
+              <div className="flex items-center gap-1 px-1">
+                {['#3b82f6', '#f97316', '#10b981', '#ec4899', '#8b5cf6', '#eab308', '#06b6d4'].map(c => (
+                  <button
+                    key={c}
+                    onClick={() => onUpdateNode(selectedNode.id, { color: c })}
+                    style={{ backgroundColor: c }}
+                    className={`w-3.5 h-3.5 rounded-full transition-transform ${
+                      selectedNode.color === c ? 'ring-2 ring-white scale-110' : 'opacity-70 hover:opacity-100'
+                    }`}
+                    title={c}
+                  />
+                ))}
+              </div>
               <button
                 onClick={() => {
                   onDeleteNode(selectedNode.id);
