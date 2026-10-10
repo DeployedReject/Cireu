@@ -2,6 +2,7 @@ import React, { useState, useMemo, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Grid,
+  Columns,
   ListTree,
   ChevronDown,
   ChevronUp,
@@ -31,6 +32,7 @@ import { computeLayout } from './algorithms/layout';
 import { Header } from './components/header/Header';
 import { GraphCanvas } from './components/canvas/GraphCanvas';
 import { AdjacencyMatrixTable } from './components/tables/AdjacencyMatrixTable';
+import { IncidenceTable } from './components/tables/IncidenceTable';
 import { EdgeListTable } from './components/tables/EdgeListTable';
 import { CircuitAnalysisPanel } from './components/analysis/CircuitAnalysisPanel';
 import { SavedGraphsModal } from './components/library/SavedGraphsModal';
@@ -55,7 +57,7 @@ export function App() {
 
   const [activeTool, setActiveTool] = useState<CanvasTool>('select');
   const [viewMode, setViewMode] = useState<ViewMode>('split');
-  const [bottomDockTab, setBottomDockTab] = useState<'matrix' | 'edges'>('matrix');
+  const [bottomDockTab, setBottomDockTab] = useState<'matrix' | 'incidence' | 'edges'>('matrix');
   const [isBottomDockOpen, setIsBottomDockOpen] = useState<boolean>(true);
   const [isLibraryModalOpen, setIsLibraryModalOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -533,6 +535,21 @@ export function App() {
 
                     <button
                       onClick={() => {
+                        setBottomDockTab('incidence');
+                        setIsBottomDockOpen(true);
+                      }}
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                        bottomDockTab === 'incidence' && isBottomDockOpen
+                          ? 'bg-orange-500/15 text-orange-400 border border-orange-500/30'
+                          : 'text-zinc-400 hover:text-zinc-200'
+                      }`}
+                    >
+                      <Columns className="w-3.5 h-3.5" />
+                      Incidence Table ({activeGraph.nodes.length}×{activeGraph.edges.length})
+                    </button>
+
+                    <button
+                      onClick={() => {
                         setBottomDockTab('edges');
                         setIsBottomDockOpen(true);
                       }}
@@ -587,6 +604,21 @@ export function App() {
                           commitGraphUpdate({ ...activeGraph, edges: [] })
                         }
                       />
+                    ) : bottomDockTab === 'incidence' ? (
+                      <IncidenceTable
+                        nodes={activeGraph.nodes}
+                        edges={activeGraph.edges}
+                        onAddEdge={handleAddEdge}
+                        onUpdateEdge={handleUpdateEdge}
+                        onDeleteEdge={handleDeleteEdge}
+                        onSelectEdge={id => {
+                          if (id) {
+                            setHighlightedEdgeIds([id]);
+                          } else {
+                            setHighlightedEdgeIds([]);
+                          }
+                        }}
+                      />
                     ) : (
                       <EdgeListTable
                         nodes={activeGraph.nodes}
@@ -639,6 +671,25 @@ export function App() {
                 onUpdateNode={handleUpdateNode}
                 onSetEdgeCountBetween={handleSetEdgeCountBetween}
                 onClearAllEdges={() => commitGraphUpdate({ ...activeGraph, edges: [] })}
+              />
+            </div>
+          )}
+
+          {viewMode === 'incidence-only' && (
+            <div className="flex-1 overflow-hidden">
+              <IncidenceTable
+                nodes={activeGraph.nodes}
+                edges={activeGraph.edges}
+                onAddEdge={handleAddEdge}
+                onUpdateEdge={handleUpdateEdge}
+                onDeleteEdge={handleDeleteEdge}
+                onSelectEdge={id => {
+                  if (id) {
+                    setHighlightedEdgeIds([id]);
+                  } else {
+                    setHighlightedEdgeIds([]);
+                  }
+                }}
               />
             </div>
           )}

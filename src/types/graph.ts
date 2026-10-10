@@ -111,4 +111,4 @@ export interface FullAnalysisResult {
 }
 
 export type CanvasTool = 'select' | 'node' | 'directed-edge' | 'undirected-edge' | 'erase' | 'pan';
-export type ViewMode = 'split' | 'canvas-only' | 'matrix-only' | 'edges-only';
+export type ViewMode = 'split' | 'canvas-only' | 'matrix-only' | 'incidence-only' | 'edges-only';

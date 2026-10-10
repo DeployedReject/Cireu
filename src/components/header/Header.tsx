@@ -8,6 +8,7 @@ import {
   LayoutPanelLeft,
   Maximize2,
   Grid,
+  Columns,
   ListTree,
   Plus,
   CheckCircle2,
@@ -47,6 +48,7 @@ export const Header: React.FC<HeaderProps> = ({
     { id: 'split', label: 'Split Studio', icon: <LayoutPanelLeft className="w-3.5 h-3.5" /> },
     { id: 'canvas-only', label: 'Canvas', icon: <Maximize2 className="w-3.5 h-3.5" /> },
     { id: 'matrix-only', label: 'Adjacency Matrix', icon: <Grid className="w-3.5 h-3.5" /> },
+    { id: 'incidence-only', label: 'Incidence Matrix', icon: <Columns className="w-3.5 h-3.5" /> },
     { id: 'edges-only', label: 'Edge Table', icon: <ListTree className="w-3.5 h-3.5" /> }
   ];
 
