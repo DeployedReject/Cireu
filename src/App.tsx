@@ -1,9 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  ChevronDown,
-  ChevronUp
-} from 'lucide-react';
+
 import {
   GraphData,
   GraphNode,
@@ -33,13 +30,13 @@ import { CircuitAnalysisPanel } from './components/analysis/CircuitAnalysisPanel
 import { SavedGraphsModal } from './components/library/SavedGraphsModal';
 
 const VERTEX_PALETTE = [
-  '#3b82f6',
-  '#f6821f',
-  '#10b981',
-  '#ec4899',
-  '#8b5cf6',
-  '#eab308',
-  '#06b6d4'
+  '#93c5fd', // pastel blue
+  '#fdba74', // pastel orange
+  '#86efac', // pastel green
+  '#f9a8d4', // pastel pink
+  '#c4b5fd', // pastel purple
+  '#fde047', // pastel yellow
+  '#67e8f9'  // pastel cyan
 ];
 
 export function App() {
@@ -418,7 +415,7 @@ export function App() {
   );
 
   return (
-    <div className="flex flex-col h-screen w-screen bg-[#0e0f11] text-zinc-200 overflow-hidden">
+    <div className="flex flex-col h-screen w-screen bg-gray-100 text-gray-800 overflow-hidden font-sans">
       {/* Top Navigation Header */}
       <Header
         activeGraph={activeGraph}
@@ -442,7 +439,7 @@ export function App() {
           {viewMode === 'split' && (
             <>
               {/* Upper Canvas Area */}
-              <div className="flex-1 min-h-[260px] relative overflow-hidden">
+              <div className="flex-1 min-h-[260px] relative overflow-hidden bg-gray-50">
                 <GraphCanvas
                   nodes={activeGraph.nodes}
                   edges={activeGraph.edges}
@@ -467,22 +464,22 @@ export function App() {
 
               {/* Lower Synchronized Table Dock */}
               <div
-                className={`border-t border-zinc-800 bg-[#111214] flex flex-col transition-all duration-200 ${
-                  isBottomDockOpen ? 'h-[290px]' : 'h-9'
+                className={`border-t border-gray-300 bg-white flex flex-col ${
+                  isBottomDockOpen ? 'h-[280px]' : 'h-8'
                 }`}
               >
                 {/* Dock Header Bar */}
-                <div className="h-9 px-3 border-b border-zinc-800 flex items-center justify-between select-none shrink-0 bg-zinc-900/50">
+                <div className="h-8 px-2 border-b border-gray-300 flex items-center justify-between select-none shrink-0 bg-gray-200">
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => {
                         setBottomDockTab('matrix');
                         setIsBottomDockOpen(true);
                       }}
-                      className={`px-2.5 py-1 rounded text-xs transition-colors ${
+                      className={`px-2 py-0.5 text-xs border ${
                         bottomDockTab === 'matrix' && isBottomDockOpen
-                          ? 'bg-zinc-800 text-zinc-100 font-medium'
-                          : 'text-zinc-400 hover:text-zinc-200'
+                          ? 'bg-white border-gray-400 text-gray-900 font-bold'
+                          : 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-white'
                       }`}
                     >
                       Adjacency
@@ -493,10 +490,10 @@ export function App() {
                         setBottomDockTab('incidence');
                         setIsBottomDockOpen(true);
                       }}
-                      className={`px-2.5 py-1 rounded text-xs transition-colors ${
+                      className={`px-2 py-0.5 text-xs border ${
                         bottomDockTab === 'incidence' && isBottomDockOpen
-                          ? 'bg-zinc-800 text-zinc-100 font-medium'
-                          : 'text-zinc-400 hover:text-zinc-200'
+                          ? 'bg-white border-gray-400 text-gray-900 font-bold'
+                          : 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-white'
                       }`}
                     >
                       Incidence
@@ -507,10 +504,10 @@ export function App() {
                         setBottomDockTab('edges');
                         setIsBottomDockOpen(true);
                       }}
-                      className={`px-2.5 py-1 rounded text-xs transition-colors ${
+                      className={`px-2 py-0.5 text-xs border ${
                         bottomDockTab === 'edges' && isBottomDockOpen
-                          ? 'bg-zinc-800 text-zinc-100 font-medium'
-                          : 'text-zinc-400 hover:text-zinc-200'
+                          ? 'bg-white border-gray-400 text-gray-900 font-bold'
+                          : 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-white'
                       }`}
                     >
                       Edges ({activeGraph.edges.length})
@@ -519,14 +516,10 @@ export function App() {
 
                   <button
                     onClick={() => setIsBottomDockOpen(o => !o)}
-                    className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200"
+                    className="px-1.5 py-0.5 text-xs border border-gray-400 bg-gray-100 hover:bg-white text-gray-700"
                     title={isBottomDockOpen ? 'Collapse' : 'Expand'}
                   >
-                    {isBottomDockOpen ? (
-                      <ChevronDown className="w-3.5 h-3.5" />
-                    ) : (
-                      <ChevronUp className="w-3.5 h-3.5" />
-                    )}
+                    {isBottomDockOpen ? 'Hide' : 'Show'}
                   </button>
                 </div>
 
@@ -684,7 +677,7 @@ export function App() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className="fixed bottom-4 right-4 z-50 px-3 py-1.5 rounded bg-zinc-900 border border-zinc-700 text-xs text-zinc-200"
+            className="fixed bottom-4 right-4 z-50 px-3 py-1.5 rounded bg-gray-200 border border-gray-300 text-xs text-gray-800"
           >
             {toastMessage}
           </motion.div>

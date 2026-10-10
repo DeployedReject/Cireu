@@ -1,9 +1,5 @@
 import { useState } from 'react';
-import {
-  Plus,
-  Trash2,
-  ArrowLeftRight
-} from 'lucide-react';
+
 import { GraphNode, GraphEdge } from '../../types/graph';
 
 interface EdgeListTableProps {
@@ -42,27 +38,27 @@ export const EdgeListTable: React.FC<EdgeListTableProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#111214] text-zinc-300 text-xs overflow-hidden">
-      {/* Flat Top Bar */}
-      <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-zinc-800 bg-zinc-900/50">
-        <span className="font-mono text-zinc-400">Edges ({edges.length})</span>
+    <div className="flex flex-col h-full bg-white text-gray-800 text-xs overflow-hidden font-sans">
+      {/* Normal Top Bar */}
+      <div className="flex items-center justify-between gap-2 px-3 py-1.5 border-b border-gray-300 bg-gray-100">
+        <span className="font-mono font-bold text-gray-700">Edges ({edges.length})</span>
 
         <div className="flex items-center gap-1">
           <button
             onClick={() => onConvertAllEdgesDirection(false)}
-            className="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700"
+            className="px-2 py-0.5 bg-gray-100 hover:bg-white text-gray-700 border border-gray-400 shadow-sm"
           >
             All Undirected
           </button>
           <button
             onClick={() => onConvertAllEdgesDirection(true)}
-            className="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700"
+            className="px-2 py-0.5 bg-gray-100 hover:bg-white text-gray-700 border border-gray-400 shadow-sm"
           >
             All Directed
           </button>
           <button
             onClick={() => setShowBulkParser(s => !s)}
-            className="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700"
+            className="px-2 py-0.5 bg-gray-100 hover:bg-white text-gray-700 border border-gray-400 shadow-sm"
           >
             {showBulkParser ? 'Hide Bulk' : 'Bulk Text'}
           </button>
@@ -70,17 +66,17 @@ export const EdgeListTable: React.FC<EdgeListTableProps> = ({
       </div>
 
       {showBulkParser && (
-        <div className="p-2 border-b border-zinc-800 bg-zinc-950/60 flex gap-2">
+        <div className="p-2 border-b border-gray-300 bg-gray-50 flex gap-2">
           <textarea
             value={bulkText}
             onChange={e => setBulkText(e.target.value)}
             rows={2}
-            className="flex-1 rounded bg-zinc-900 border border-zinc-700 p-1.5 font-mono text-zinc-200 text-xs focus:outline-none"
+            className="flex-1 bg-white border border-gray-400 p-1.5 font-mono text-gray-900 text-xs"
             placeholder="A - B, B -> C"
           />
           <button
             onClick={() => onParseBulkEdgeText(bulkText)}
-            className="px-3 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700 font-medium self-end"
+            className="px-2.5 py-1 bg-gray-200 hover:bg-white text-gray-900 border border-gray-400 font-bold self-end"
           >
             Parse
           </button>
@@ -90,32 +86,32 @@ export const EdgeListTable: React.FC<EdgeListTableProps> = ({
       {/* Quick Add Bar */}
       <form
         onSubmit={handleQuickAdd}
-        className="flex items-center gap-2 px-3 py-1.5 border-b border-zinc-800 bg-zinc-900/30"
+        className="flex items-center gap-2 px-3 py-1.5 border-b border-gray-300 bg-gray-50"
       >
-        <span className="text-zinc-500 font-mono">u:</span>
+        <span className="text-gray-500 font-mono">u:</span>
         <input
           list="edge-vertex-list"
           value={newSource}
           onChange={e => setNewSource(e.target.value)}
           placeholder="A"
-          className="w-16 px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-700 font-mono text-zinc-200 focus:outline-none"
+          className="w-16 px-1.5 py-0.5 bg-white border border-gray-400 font-mono text-gray-900"
         />
 
         <button
           type="button"
           onClick={() => setNewDirected(d => !d)}
-          className="px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono text-[11px]"
+          className="px-2 py-0.5 bg-white border border-gray-400 text-gray-800 font-bold text-[11px]"
         >
           {newDirected ? '→' : '—'}
         </button>
 
-        <span className="text-zinc-500 font-mono">v:</span>
+        <span className="text-gray-500 font-mono">v:</span>
         <input
           list="edge-vertex-list"
           value={newTarget}
           onChange={e => setNewTarget(e.target.value)}
           placeholder="B"
-          className="w-16 px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-700 font-mono text-zinc-200 focus:outline-none"
+          className="w-16 px-1.5 py-0.5 bg-white border border-gray-400 font-mono text-gray-900"
         />
 
         <datalist id="edge-vertex-list">
@@ -129,14 +125,13 @@ export const EdgeListTable: React.FC<EdgeListTableProps> = ({
           value={newLabel}
           onChange={e => setNewLabel(e.target.value)}
           placeholder="label (opt)"
-          className="w-24 px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-700 text-zinc-200 focus:outline-none"
+          className="w-24 px-1.5 py-0.5 bg-white border border-gray-400 text-gray-900"
         />
 
         <button
           type="submit"
-          className="flex items-center gap-1 px-2.5 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700 font-medium"
+          className="px-2.5 py-0.5 bg-gray-200 hover:bg-white text-gray-900 border border-gray-400 font-bold"
         >
-          <Plus className="w-3 h-3" />
           Add
         </button>
       </form>
@@ -145,7 +140,7 @@ export const EdgeListTable: React.FC<EdgeListTableProps> = ({
       <div className="flex-1 overflow-auto">
         <table className="w-full text-left border-collapse font-mono text-xs">
           <thead>
-            <tr className="border-b border-zinc-800 bg-zinc-900 text-zinc-500 font-normal">
+            <tr className="border-b border-gray-300 bg-gray-100 text-gray-600 font-bold">
               <th className="py-1 px-3">#</th>
               <th className="py-1 px-2">Source</th>
               <th className="py-1 px-2 text-center">Type</th>
@@ -154,15 +149,15 @@ export const EdgeListTable: React.FC<EdgeListTableProps> = ({
               <th className="py-1 px-3 text-right" />
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-800">
+          <tbody className="divide-y divide-gray-200">
             {edges.map((edge, idx) => (
-              <tr key={edge.id} className="hover:bg-zinc-900/40">
-                <td className="py-1 px-3 text-zinc-500">{idx + 1}</td>
+              <tr key={edge.id} className="hover:bg-gray-50">
+                <td className="py-1 px-3 text-gray-400">{idx + 1}</td>
                 <td className="py-1 px-2">
                   <select
                     value={edge.source}
                     onChange={e => onUpdateEdge(edge.id, { source: e.target.value })}
-                    className="bg-zinc-900 border border-zinc-800 rounded px-1.5 py-0.5 text-zinc-200 focus:outline-none"
+                    className="bg-white border border-gray-300 px-1 py-0.5 text-gray-800"
                   >
                     {nodes.map(n => (
                       <option key={n.id} value={n.id}>
@@ -174,10 +169,10 @@ export const EdgeListTable: React.FC<EdgeListTableProps> = ({
                 <td className="py-1 px-2 text-center">
                   <button
                     onClick={() => onUpdateEdge(edge.id, { directed: !edge.directed })}
-                    className={`px-1.5 py-0.5 rounded text-[11px] font-bold border transition-colors ${
+                    className={`px-1.5 py-0.5 rounded text-[11px] font-bold border ${
                       edge.directed
-                        ? 'bg-sky-950/60 text-sky-300 border-sky-900/50'
-                        : 'bg-emerald-950/60 text-emerald-300 border-emerald-900/50'
+                        ? 'bg-blue-100 text-blue-900 border-blue-300'
+                        : 'bg-green-100 text-green-900 border-green-300'
                     }`}
                   >
                     {edge.directed ? '→' : '—'}
@@ -187,7 +182,7 @@ export const EdgeListTable: React.FC<EdgeListTableProps> = ({
                   <select
                     value={edge.target}
                     onChange={e => onUpdateEdge(edge.id, { target: e.target.value })}
-                    className="bg-zinc-900 border border-zinc-800 rounded px-1.5 py-0.5 text-zinc-200 focus:outline-none"
+                    className="bg-white border border-gray-300 px-1 py-0.5 text-gray-800"
                   >
                     {nodes.map(n => (
                       <option key={n.id} value={n.id}>
@@ -202,11 +197,11 @@ export const EdgeListTable: React.FC<EdgeListTableProps> = ({
                     value={edge.label || ''}
                     onChange={e => onUpdateEdge(edge.id, { label: e.target.value })}
                     placeholder="—"
-                    className="bg-transparent border-none text-zinc-400 focus:outline-none w-20"
+                    className="bg-transparent border-none text-gray-700 w-20"
                   />
                 </td>
                 <td className="py-1 px-3 text-right">
-                  <div className="inline-flex items-center gap-1">
+                  <div className="inline-flex items-center gap-2">
                     <button
                       onClick={() =>
                         onUpdateEdge(edge.id, {
@@ -215,16 +210,16 @@ export const EdgeListTable: React.FC<EdgeListTableProps> = ({
                         })
                       }
                       title="Swap"
-                      className="p-1 rounded text-zinc-500 hover:text-zinc-200"
+                      className="text-gray-500 hover:text-gray-900 font-bold"
                     >
-                      <ArrowLeftRight className="w-3 h-3" />
+                      ⇄
                     </button>
                     <button
                       onClick={() => onDeleteEdge(edge.id)}
                       title="Delete"
-                      className="p-1 rounded text-zinc-500 hover:text-rose-400"
+                      className="text-gray-400 hover:text-red-700 font-bold"
                     >
-                      <Trash2 className="w-3 h-3" />
+                      ×
                     </button>
                   </div>
                 </td>
@@ -232,7 +227,7 @@ export const EdgeListTable: React.FC<EdgeListTableProps> = ({
             ))}
             {edges.length === 0 && (
               <tr>
-                <td colSpan={6} className="py-6 text-center text-zinc-600 font-sans">
+                <td colSpan={6} className="py-6 text-center text-gray-400 font-sans">
                   No edges.
                 </td>
               </tr>

@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-  FolderKanban,
-  Download,
-  Plus
-} from 'lucide-react';
+
 import { GraphData, ViewMode } from '../../types/graph';
 
 interface HeaderProps {
@@ -38,10 +34,10 @@ export const Header: React.FC<HeaderProps> = ({
   ];
 
   return (
-    <header className="h-12 px-3 bg-[#111214] border-b border-zinc-800 flex items-center justify-between gap-3 select-none shrink-0 text-zinc-300">
+    <header className="h-10 px-3 bg-gray-200 border-b border-gray-400 flex items-center justify-between gap-2 select-none shrink-0 text-gray-800 text-xs font-sans">
       {/* Left: Brand + Graph Selection */}
       <div className="flex items-center gap-2 min-w-0">
-        <span className="font-semibold text-sm text-zinc-100 tracking-tight pl-1 pr-2 border-r border-zinc-800">
+        <span className="font-bold text-sm text-gray-900 tracking-tight pr-2 border-r border-gray-400">
           Cireu
         </span>
 
@@ -52,7 +48,7 @@ export const Header: React.FC<HeaderProps> = ({
             if (found) onSelectGraph(found);
           }}
           aria-label="Select graph"
-          className="bg-zinc-900 border border-zinc-700/80 rounded px-2 py-1 text-xs text-zinc-200 focus:outline-none focus:border-zinc-500 max-w-[170px] sm:max-w-[210px] truncate"
+          className="bg-white border border-gray-400 px-1.5 py-0.5 text-xs text-gray-900 max-w-[160px] sm:max-w-[200px] truncate"
         >
           {savedGraphs.map(g => (
             <option key={g.id} value={g.id}>
@@ -66,32 +62,31 @@ export const Header: React.FC<HeaderProps> = ({
           value={activeGraph.name}
           onChange={e => onRenameGraph(e.target.value)}
           aria-label="Rename graph"
-          className="hidden md:block bg-transparent hover:bg-zinc-900/50 focus:bg-zinc-900 px-2 py-1 rounded border border-transparent focus:border-zinc-700 text-xs text-zinc-200 focus:outline-none w-40 truncate"
+          className="hidden md:block bg-white px-1.5 py-0.5 border border-gray-400 text-xs text-gray-900 w-36 truncate"
           title="Click to rename"
         />
 
         <button
           onClick={onCreateNewGraph}
-          className="flex items-center gap-1 px-2 py-1 rounded text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700"
+          className="px-2 py-0.5 text-xs bg-gray-100 hover:bg-white text-gray-800 border border-gray-400 shadow-sm"
           title="Create New Graph"
         >
-          <Plus className="w-3.5 h-3.5" />
-          <span>New</span>
+          + New
         </button>
       </div>
 
       {/* Center: View Switcher */}
-      <div className="hidden md:flex items-center bg-zinc-900 border border-zinc-800 rounded p-0.5 text-xs">
+      <div className="hidden md:flex items-center border border-gray-400 bg-gray-300">
         {viewModes.map(mode => {
           const active = viewMode === mode.id;
           return (
             <button
               key={mode.id}
               onClick={() => setViewMode(mode.id)}
-              className={`px-2.5 py-1 rounded transition-colors ${
+              className={`px-2 py-0.5 text-xs ${
                 active
-                  ? 'bg-zinc-800 text-zinc-100 font-medium'
-                  : 'text-zinc-400 hover:text-zinc-200'
+                  ? 'bg-white text-gray-900 font-bold border-r border-gray-400 last:border-r-0'
+                  : 'text-gray-700 hover:bg-gray-100 border-r border-gray-300 last:border-r-0'
               }`}
             >
               {mode.label}
@@ -104,19 +99,17 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="flex items-center gap-1.5">
         <button
           onClick={onOpenLibraryModal}
-          className="flex items-center gap-1 px-2.5 py-1 rounded text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700"
+          className="px-2 py-0.5 text-xs bg-gray-100 hover:bg-white text-gray-800 border border-gray-400 shadow-sm"
         >
-          <FolderKanban className="w-3.5 h-3.5 text-zinc-400" />
-          <span>Saved ({savedGraphs.length})</span>
+          Saved ({savedGraphs.length})
         </button>
 
         <button
           onClick={onExportAll}
-          className="flex items-center gap-1 px-2.5 py-1 rounded text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700"
+          className="px-2 py-0.5 text-xs bg-gray-100 hover:bg-white text-gray-800 border border-gray-400 shadow-sm"
           title="Export JSON"
         >
-          <Download className="w-3.5 h-3.5 text-zinc-400" />
-          <span>Export</span>
+          Export
         </button>
       </div>
     </header>

@@ -1,19 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import {
-  MousePointer,
-  PlusCircle,
-  ArrowUpRight,
-  Minus,
-  Trash2,
-  Hand,
-  ZoomIn,
-  ZoomOut,
-  Maximize2,
-  Grid,
-  CircleDot,
-  Compass,
-  LayoutGrid
-} from 'lucide-react';
+
 import {
   GraphNode,
   GraphEdge,
@@ -358,105 +344,90 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
   const selectedEdge = selectedEdgeId ? edges.find(e => e.id === selectedEdgeId) : null;
 
   const toolItems: { id: CanvasTool; label: string; icon: React.ReactNode }[] = [
-    { id: 'select', label: 'Select', icon: <MousePointer className="w-3.5 h-3.5" /> },
-    { id: 'node', label: 'Node', icon: <PlusCircle className="w-3.5 h-3.5" /> },
-    { id: 'undirected-edge', label: 'Edge', icon: <Minus className="w-3.5 h-3.5" /> },
-    { id: 'directed-edge', label: 'Directed', icon: <ArrowUpRight className="w-3.5 h-3.5" /> },
-    { id: 'erase', label: 'Erase', icon: <Trash2 className="w-3.5 h-3.5" /> },
-    { id: 'pan', label: 'Pan', icon: <Hand className="w-3.5 h-3.5" /> }
+    { id: 'select', label: 'Select', icon: null },
+    { id: 'node', label: 'Node', icon: null },
+    { id: 'undirected-edge', label: 'Edge', icon: null },
+    { id: 'directed-edge', label: 'Directed', icon: null },
+    { id: 'erase', label: 'Erase', icon: null },
+    { id: 'pan', label: 'Pan', icon: null },
   ];
 
   return (
-    <div className="relative w-full h-full flex flex-col bg-[#0e0f11] overflow-hidden select-none">
-      {/* Flat Toolbar */}
+    <div className="relative w-full h-full flex flex-col bg-gray-100 overflow-hidden select-none font-sans">
+      {/* Normal Grey Toolbar */}
       <div className="absolute top-2 left-2 right-2 z-20 flex items-center justify-between gap-2 pointer-events-none">
         {/* Left: Tools */}
-        <div className="flex items-center gap-0.5 p-0.5 rounded bg-zinc-900 border border-zinc-800 pointer-events-auto">
-          {toolItems.map(tool => {
-            const isActive = activeTool === tool.id;
-            return (
-              <button
-                key={tool.id}
-                onClick={() => setActiveTool(tool.id)}
-                title={tool.label}
-                className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${
-                  isActive
-                    ? 'bg-zinc-800 text-zinc-100 font-medium'
-                    : 'text-zinc-400 hover:text-zinc-200'
-                }`}
-              >
-                {tool.icon}
-                <span className="hidden sm:inline">{tool.label}</span>
-              </button>
-            );
-          })}
-        </div>
+      <div className="flex items-center border border-gray-400 bg-gray-200 pointer-events-auto">
+        {toolItems.map(tool => {
+          const isActive = activeTool === tool.id;
+          return (
+            <button
+              key={tool.id}
+              onClick={() => setActiveTool(tool.id)}
+              className={`px-2 py-1 text-xs border-r border-gray-300 last:border-r-0 ${isActive ? 'bg-white text-gray-900 font-bold' : 'bg-gray-100 text-gray-700'}`}
+            >
+              {tool.label}
+            </button>
+          );
+        })}
+      </div>
 
         {/* Right: Layout & View Controls */}
         <div className="flex items-center gap-1 pointer-events-auto">
-          <div className="flex items-center gap-0.5 p-0.5 rounded bg-zinc-900 border border-zinc-800 text-xs">
-            <button
-              onClick={() => handleAutoLayout('circle')}
-              title="Circular Layout"
-              className="p-1 rounded text-zinc-400 hover:text-zinc-200"
-            >
-              <CircleDot className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={() => handleAutoLayout('force')}
-              title="Spring Layout"
-              className="p-1 rounded text-zinc-400 hover:text-zinc-200"
-            >
-              <Compass className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={() => handleAutoLayout('grid')}
-              title="Grid Layout"
-              className="p-1 rounded text-zinc-400 hover:text-zinc-200"
-            >
-              <LayoutGrid className="w-3.5 h-3.5" />
-            </button>
-            <div className="w-px h-3.5 bg-zinc-800 mx-0.5" />
-            <button
-              onClick={() => setSnapToGrid(s => !s)}
-              title="Grid Snap"
-              className={`p-1 rounded ${snapToGrid ? 'text-zinc-200 bg-zinc-800' : 'text-zinc-500'}`}
-            >
-              <Grid className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={() => setShowDegreesOnCanvas(d => !d)}
-              title="Toggle Degrees"
-              className={`px-1.5 py-0.5 rounded text-[11px] font-mono ${
-                showDegreesOnCanvas ? 'text-zinc-200 bg-zinc-800' : 'text-zinc-500'
-              }`}
-            >
-              deg
-            </button>
-            <div className="w-px h-3.5 bg-zinc-800 mx-0.5" />
-            <button
-              onClick={() => setZoom(z => Math.max(0.4, +(z - 0.15).toFixed(2)))}
-              className="p-1 rounded text-zinc-400 hover:text-zinc-200"
-            >
-              <ZoomOut className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={() => setZoom(z => Math.min(2.2, +(z + 0.15).toFixed(2)))}
-              className="p-1 rounded text-zinc-400 hover:text-zinc-200"
-            >
-              <ZoomIn className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={() => {
-                setPan({ x: 0, y: 0 });
-                setZoom(1);
-              }}
-              title="Reset View"
-              className="p-1 rounded text-zinc-400 hover:text-zinc-200"
-            >
-              <Maximize2 className="w-3.5 h-3.5" />
-            </button>
-          </div>
+      {/* Right: Layout & View Controls */}
+      <div className="flex items-center gap-1 pointer-events-auto">
+        <button
+          onClick={() => handleAutoLayout('circle')}
+          className="px-2 py-1 text-xs bg-gray-100 border border-gray-400"
+        >
+          Circle
+        </button>
+        <button
+          onClick={() => handleAutoLayout('force')}
+          className="px-2 py-1 text-xs bg-gray-100 border border-gray-400"
+        >
+          Force
+        </button>
+        <button
+          onClick={() => handleAutoLayout('grid')}
+          className="px-2 py-1 text-xs bg-gray-100 border border-gray-400"
+        >
+          Grid
+        </button>
+        <button
+          onClick={() => setSnapToGrid(s => !s)}
+          className="px-2 py-1 text-xs bg-gray-100 border border-gray-400"
+        >
+          {snapToGrid ? 'Snap On' : 'Snap Off'}
+        </button>
+        <button
+          onClick={() => setShowDegreesOnCanvas(d => !d)}
+          className="px-2 py-1 text-xs bg-gray-100 border border-gray-400"
+        >
+          {showDegreesOnCanvas ? 'Deg On' : 'Deg Off'}
+        </button>
+        <button
+          onClick={() => setZoom(z => Math.max(0.4, +(z - 0.15).toFixed(2)))}
+          className="px-2 py-1 text-xs bg-gray-100 border border-gray-400"
+        >
+          -
+        </button>
+        <button
+          onClick={() => setZoom(z => Math.min(2.2, +(z + 0.15).toFixed(2)))}
+          className="px-2 py-1 text-xs bg-gray-100 border border-gray-400"
+        >
+          +
+        </button>
+        <button
+          onClick={() => {
+            setPan({ x: 0, y: 0 });
+            setZoom(1);
+          }}
+          className="px-2 py-1 text-xs bg-gray-100 border border-gray-400"
+        >
+          Reset
+        </button>
+      </div>
         </div>
       </div>
 
@@ -484,7 +455,7 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
             patternUnits="userSpaceOnUse"
             patternTransform={`translate(${pan.x % (20 * zoom)}, ${pan.y % (20 * zoom)})`}
           >
-            <circle cx="1" cy="1" r="1" fill="#222326" />
+            <circle cx="1" cy="1" r="1" fill="#cbd5e1" />
           </pattern>
 
           <marker
@@ -496,7 +467,7 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
             markerHeight="6"
             orient="auto-start-reverse"
           >
-            <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#64748b" />
+            <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#475569" />
           </marker>
           <marker
             id="arrow-selected"
@@ -507,7 +478,7 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
             markerHeight="6"
             orient="auto-start-reverse"
           >
-            <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#38bdf8" />
+            <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#2563eb" />
           </marker>
           <marker
             id="arrow-walk-direction"
@@ -518,7 +489,7 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
             markerHeight="8"
             orient="auto"
           >
-            <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#10b981" className="animate-arrow-nudge" />
+            <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#16a34a" className="animate-arrow-nudge" />
           </marker>
         </defs>
 
@@ -560,20 +531,20 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
               if (id === edge.id) stepNumbers.push(idx + 1);
             });
 
-            let strokeColor = edge.color || '#52525b';
+            let strokeColor = edge.color || '#64748b';
             let strokeWidth = 2;
             let markerEnd: string | undefined = edge.directed ? 'url(#arrow-default)' : undefined;
 
             if (isSelected) {
-              strokeColor = '#38bdf8';
+              strokeColor = '#2563eb';
               strokeWidth = 2.5;
               if (edge.directed) markerEnd = 'url(#arrow-selected)';
             } else if (isActiveStep) {
-              strokeColor = '#22c55e';
+              strokeColor = '#16a34a';
               strokeWidth = 3.5;
               markerEnd = 'url(#arrow-walk-direction)';
             } else if (isHighlighted) {
-              strokeColor = '#f97316';
+              strokeColor = '#ea580c';
               strokeWidth = 2.5;
             }
 
@@ -604,7 +575,7 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
                   <path
                     d={edgePath}
                     fill="none"
-                    stroke="#34d399"
+                    stroke="#22c55e"
                     strokeWidth={strokeWidth}
                     className="animate-edge-flow pointer-events-none"
                     strokeLinecap="round"
@@ -618,20 +589,20 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
                       y={-10}
                       width={36}
                       height={20}
-                      rx={3}
-                      fill={isActiveStep ? '#052e16' : '#18181b'}
-                      stroke={isActiveStep ? '#22c55e' : '#3f3f46'}
+                      rx={2}
+                      fill={isActiveStep ? '#dcfce7' : '#ffffff'}
+                      stroke={isActiveStep ? '#16a34a' : '#94a3b8'}
                       strokeWidth={1}
                     />
                     <text
                       textAnchor="middle"
                       dominantBaseline="central"
-                      className={`text-[10px] font-mono ${
+                      className={`text-[10px] font-mono font-medium ${
                         isActiveStep
-                          ? 'fill-emerald-300 font-bold'
+                          ? 'fill-emerald-800 font-bold'
                           : isHighlighted
-                          ? 'fill-orange-300'
-                          : 'fill-zinc-400'
+                          ? 'fill-orange-800'
+                          : 'fill-gray-700'
                       }`}
                     >
                       {stepNumbers.length > 0 ? `#${stepNumbers.join(',')}` : edge.label}
@@ -651,20 +622,20 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
             const isActiveStepSource = activeFromNodeId === node.id;
             const deg = degreeInfo[node.id] || { degree: 0, isOdd: false };
 
-            let strokeColor = node.color || '#52525b';
+            let strokeColor = node.color ? '#64748b' : '#94a3b8';
             let strokeWidth = 1.5;
 
             if (isActiveStepTarget) {
-              strokeColor = '#22c55e';
+              strokeColor = '#16a34a';
               strokeWidth = 3;
             } else if (isActiveStepSource) {
-              strokeColor = '#f59e0b';
+              strokeColor = '#d97706';
               strokeWidth = 2.5;
             } else if (isSelected) {
-              strokeColor = '#38bdf8';
+              strokeColor = '#2563eb';
               strokeWidth = 2.5;
             } else if (isConnectingSource || isHighlighted) {
-              strokeColor = '#f97316';
+              strokeColor = '#ea580c';
               strokeWidth = 2;
             }
 
@@ -676,10 +647,10 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
                 onClick={e => handleNodeClick(e, node.id)}
                 className="cursor-pointer"
               >
-                {/* Node Circle with distinct color */}
+                {/* Node Circle with pastel fill */}
                 <circle
                   r={22}
-                  fill={node.color ? `${node.color}22` : '#18181b'}
+                  fill={node.color || '#e2e8f0'}
                   stroke={strokeColor}
                   strokeWidth={strokeWidth}
                 />
@@ -688,12 +659,12 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
                 <text
                   textAnchor="middle"
                   dominantBaseline="central"
-                  className="text-xs font-mono font-medium fill-zinc-200 pointer-events-none"
+                  className="text-xs font-mono font-bold fill-gray-900 pointer-events-none"
                 >
                   {node.id}
                 </text>
 
-                {/* Flat FROM / TO indicator */}
+                {/* FROM / TO indicator */}
                 {(isActiveStepSource || isActiveStepTarget) && (
                   <g transform="translate(0, -28)" className="pointer-events-none">
                     <rect
@@ -702,15 +673,15 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
                       width={32}
                       height={14}
                       rx={2}
-                      fill={isActiveStepTarget ? '#052e16' : '#451a03'}
-                      stroke={isActiveStepTarget ? '#22c55e' : '#f59e0b'}
+                      fill={isActiveStepTarget ? '#dcfce7' : '#fef3c7'}
+                      stroke={isActiveStepTarget ? '#16a34a' : '#d97706'}
                       strokeWidth={1}
                     />
                     <text
                       textAnchor="middle"
                       dominantBaseline="central"
                       className={`text-[8px] font-mono font-bold ${
-                        isActiveStepTarget ? 'fill-emerald-300' : 'fill-amber-300'
+                        isActiveStepTarget ? 'fill-emerald-800' : 'fill-amber-800'
                       }`}
                     >
                       {isActiveStepTarget ? 'TO' : 'FROM'}
@@ -723,7 +694,7 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
                   x={0}
                   y={32}
                   textAnchor="middle"
-                  className="text-[10px] fill-zinc-400 pointer-events-none"
+                  className="text-[10px] fill-gray-600 pointer-events-none font-medium"
                 >
                   {node.label}
                 </text>
@@ -733,14 +704,14 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
                   <g transform="translate(16, -16)" className="pointer-events-none">
                     <circle
                       r={7}
-                      fill={deg.isOdd ? '#451a03' : '#18181b'}
-                      stroke={deg.isOdd ? '#f59e0b' : '#3f3f46'}
+                      fill={deg.isOdd ? '#fef3c7' : '#ffffff'}
+                      stroke={deg.isOdd ? '#d97706' : '#94a3b8'}
                       strokeWidth={1}
                     />
                     <text
                       textAnchor="middle"
                       dominantBaseline="central"
-                      className="text-[8px] font-mono fill-zinc-300"
+                      className="text-[8px] font-mono fill-gray-800 font-bold"
                     >
                       {deg.degree}
                     </text>
@@ -752,26 +723,26 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
         </g>
       </svg>
 
-      {/* Flat Selected Item Inspector */}
+      {/* Selected Item Inspector */}
       {(selectedNode || selectedEdge) && (
-        <div className="absolute bottom-2 left-2 z-20 flex items-center gap-2 p-1.5 rounded bg-zinc-900 border border-zinc-800 text-xs text-zinc-300">
+        <div className="absolute bottom-2 left-2 z-20 flex items-center gap-2 p-1.5 bg-gray-200 border border-gray-400 text-xs text-gray-800 shadow-sm font-sans">
           {selectedNode && (
             <>
-              <span className="font-mono text-zinc-400">Vertex {selectedNode.id}</span>
+              <span className="font-mono font-bold text-gray-700">Vertex {selectedNode.id}</span>
               <input
                 type="text"
                 value={selectedNode.label}
                 onChange={e => onUpdateNode(selectedNode.id, { label: e.target.value })}
-                className="px-2 py-0.5 rounded bg-zinc-950 border border-zinc-700 text-xs text-zinc-200 focus:outline-none w-28"
+                className="px-1.5 py-0.5 bg-white border border-gray-400 text-xs text-gray-900 w-28"
               />
               <div className="flex items-center gap-1 px-1">
-                {['#3b82f6', '#f97316', '#10b981', '#ec4899', '#8b5cf6', '#eab308', '#06b6d4'].map(c => (
+                {['#93c5fd', '#fdba74', '#86efac', '#f9a8d4', '#c4b5fd', '#fde047', '#67e8f9'].map(c => (
                   <button
                     key={c}
                     onClick={() => onUpdateNode(selectedNode.id, { color: c })}
                     style={{ backgroundColor: c }}
-                    className={`w-3.5 h-3.5 rounded-full transition-transform ${
-                      selectedNode.color === c ? 'ring-2 ring-white scale-110' : 'opacity-70 hover:opacity-100'
+                    className={`w-3.5 h-3.5 border border-gray-400 ${
+                      selectedNode.color === c ? 'ring-2 ring-gray-700' : ''
                     }`}
                     title={c}
                   />
@@ -782,7 +753,7 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
                   onDeleteNode(selectedNode.id);
                   setSelectedNodeId(null);
                 }}
-                className="px-2 py-0.5 rounded bg-zinc-800 hover:bg-rose-950 hover:text-rose-300 text-zinc-400 text-xs border border-zinc-700"
+                className="px-2 py-0.5 bg-gray-100 hover:bg-red-100 hover:text-red-700 text-gray-700 text-xs border border-gray-400"
               >
                 Delete
               </button>
@@ -791,7 +762,7 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
 
           {selectedEdge && (
             <>
-              <span className="font-mono text-zinc-400">
+              <span className="font-mono font-bold text-gray-700">
                 Edge {selectedEdge.source} {selectedEdge.directed ? '→' : '—'} {selectedEdge.target}
               </span>
               <input
@@ -799,13 +770,13 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
                 value={selectedEdge.label || ''}
                 onChange={e => onUpdateEdge(selectedEdge.id, { label: e.target.value })}
                 placeholder="Label"
-                className="px-2 py-0.5 rounded bg-zinc-950 border border-zinc-700 text-xs text-zinc-200 focus:outline-none w-24"
+                className="px-1.5 py-0.5 bg-white border border-gray-400 text-xs text-gray-900 w-24"
               />
               <button
                 onClick={() =>
                   onUpdateEdge(selectedEdge.id, { directed: !selectedEdge.directed })
                 }
-                className="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-xs text-zinc-300 border border-zinc-700"
+                className="px-2 py-0.5 bg-gray-100 hover:bg-white text-xs text-gray-800 border border-gray-400"
               >
                 {selectedEdge.directed ? 'Directed' : 'Undirected'}
               </button>
@@ -814,7 +785,7 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
                   onDeleteEdge(selectedEdge.id);
                   setSelectedEdgeId(null);
                 }}
-                className="px-2 py-0.5 rounded bg-zinc-800 hover:bg-rose-950 hover:text-rose-300 text-zinc-400 text-xs border border-zinc-700"
+                className="px-2 py-0.5 bg-gray-100 hover:bg-red-100 hover:text-red-700 text-gray-700 text-xs border border-gray-400"
               >
                 Delete
               </button>

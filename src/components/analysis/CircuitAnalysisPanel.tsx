@@ -158,9 +158,9 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#111214] border-l border-zinc-800 text-zinc-300 text-xs overflow-hidden select-none">
-      {/* Flat Tabs */}
-      <div className="flex border-b border-zinc-800 bg-zinc-900/50">
+    <div className="flex flex-col h-full bg-white border-l border-gray-300 text-gray-800 text-xs overflow-hidden select-none font-sans">
+      {/* Normal Tabs */}
+      <div className="flex border-b border-gray-300 bg-gray-200">
         {[
           { id: 'eulerian', label: 'Eulerian' },
           { id: 'hamiltonian', label: 'Hamiltonian' },
@@ -171,10 +171,10 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as typeof activeTab)}
-              className={`flex-1 py-2 text-center transition-colors ${
+              className={`flex-1 py-1.5 text-center text-xs border-r border-gray-300 last:border-r-0 ${
                 active
-                  ? 'border-b-2 border-zinc-300 text-zinc-100 font-medium'
-                  : 'text-zinc-400 hover:text-zinc-200'
+                  ? 'bg-white text-gray-900 font-bold border-t-2 border-t-blue-600'
+                  : 'text-gray-700 hover:bg-gray-100'
               }`}
             >
               {tab.label}
@@ -183,14 +183,14 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
         })}
       </div>
 
-      {/* Flat Playback Controller (when walk steps exist) */}
+      {/* Playback Controller (when walk steps exist) */}
       {activeTab !== 'degrees' && activeTrace.steps.length > 0 && (
-        <div className="p-3 border-b border-zinc-800 bg-[#141517] space-y-2">
+        <div className="p-2.5 border-b border-gray-300 bg-gray-50 space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1">
               <button
                 onClick={isPlaying ? () => setIsPlaying(false) : handleStartPlayback}
-                className="flex items-center gap-1 px-2.5 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700 font-medium text-xs"
+                className="flex items-center gap-1 px-2.5 py-1 bg-gray-200 hover:bg-white text-gray-900 border border-gray-400 font-bold text-xs"
               >
                 {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
                 <span>{isPlaying ? 'Pause' : 'Play Walk'}</span>
@@ -202,7 +202,7 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
                   setCurrentStepIdx(i => Math.max(0, i - 1));
                 }}
                 disabled={currentStepIdx <= 0}
-                className="p-1 rounded bg-zinc-800 hover:bg-zinc-700 disabled:opacity-40 text-zinc-300 border border-zinc-700"
+                className="p-1 bg-gray-100 hover:bg-white disabled:opacity-40 text-gray-700 border border-gray-400"
                 title="Previous Step"
               >
                 <SkipBack className="w-3.5 h-3.5" />
@@ -214,7 +214,7 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
                   setCurrentStepIdx(i => Math.min(activeTrace.steps.length - 1, i + 1));
                 }}
                 disabled={currentStepIdx >= activeTrace.steps.length - 1}
-                className="p-1 rounded bg-zinc-800 hover:bg-zinc-700 disabled:opacity-40 text-zinc-300 border border-zinc-700"
+                className="p-1 bg-gray-100 hover:bg-white disabled:opacity-40 text-gray-700 border border-gray-400"
                 title="Next Step"
               >
                 <SkipForward className="w-3.5 h-3.5" />
@@ -222,7 +222,7 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
 
               <button
                 onClick={handleResetPlayback}
-                className="p-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-zinc-200 border border-zinc-700"
+                className="p-1 bg-gray-100 hover:bg-white text-gray-700 border border-gray-400"
                 title="Reset"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
@@ -237,8 +237,8 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
                 <button
                   key={s.label}
                   onClick={() => setSpeedMs(s.ms)}
-                  className={`px-1.5 py-0.5 rounded ${
-                    speedMs === s.ms ? 'bg-zinc-800 text-zinc-100 font-bold' : 'text-zinc-500'
+                  className={`px-1.5 py-0.5 border border-gray-400 ${
+                    speedMs === s.ms ? 'bg-white text-gray-900 font-bold' : 'bg-gray-100 text-gray-600 hover:bg-white'
                   }`}
                 >
                   {s.label}
@@ -247,7 +247,7 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center justify-between text-[11px] font-mono text-zinc-400">
+          <div className="flex items-center justify-between text-[11px] font-mono text-gray-600">
             <span>
               {currentStepIdx >= 0
                 ? `Step ${currentStepIdx + 1} / ${activeTrace.steps.length}`
@@ -258,7 +258,7 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
                 setIsPlaying(false);
                 setCurrentStepIdx(activeTrace.steps.length - 1);
               }}
-              className="text-zinc-400 hover:text-zinc-200 underline"
+              className="text-gray-700 hover:underline"
             >
               Show all
             </button>
@@ -273,11 +273,11 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
               setIsPlaying(false);
               setCurrentStepIdx(Number(e.target.value));
             }}
-            className="w-full h-1 bg-zinc-800 rounded accent-zinc-400 cursor-pointer"
+            className="w-full h-1.5 bg-gray-300 rounded cursor-pointer"
           />
 
           {currentStepIdx >= 0 && activeTrace.steps[currentStepIdx] && (
-            <div className="px-2 py-1 rounded bg-zinc-900 border border-zinc-800 text-[11px] font-mono text-emerald-400">
+            <div className="px-2 py-1 bg-green-50 border border-green-300 text-[11px] font-mono text-green-900 font-bold">
               {activeTrace.steps[currentStepIdx].note}
             </div>
           )}
@@ -290,40 +290,40 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
           <div className="space-y-3">
             {/* Diagnostic summary */}
             <div
-              className={`p-2.5 rounded border ${
+              className={`p-2.5 border ${
                 eulerian.hasEulerianCircuit
-                  ? 'bg-emerald-950/20 border-emerald-900/60'
+                  ? 'bg-green-50 border-green-300 text-green-900'
                   : eulerian.hasEulerianPath
-                  ? 'bg-sky-950/20 border-sky-900/60'
-                  : 'bg-zinc-900 border-zinc-800'
+                  ? 'bg-blue-50 border-blue-300 text-blue-900'
+                  : 'bg-gray-100 border-gray-300 text-gray-800'
               }`}
             >
-              <div className="font-semibold text-zinc-200 mb-1 flex items-center gap-1.5">
+              <div className="font-bold mb-1 flex items-center gap-1.5">
                 {eulerian.hasEulerianCircuit ? (
                   <>
-                    <Check className="w-3.5 h-3.5 text-emerald-400" />
-                    <span className="text-emerald-300">Eulerian Circuit Exists</span>
+                    <Check className="w-4 h-4 text-green-600" />
+                    <span>Eulerian Circuit Exists</span>
                   </>
                 ) : eulerian.hasEulerianPath ? (
                   <>
-                    <Check className="w-3.5 h-3.5 text-sky-400" />
-                    <span className="text-sky-300">Eulerian Path Exists (No Circuit)</span>
+                    <Check className="w-4 h-4 text-blue-600" />
+                    <span>Eulerian Path Exists (No Circuit)</span>
                   </>
                 ) : (
                   <>
-                    <X className="w-3.5 h-3.5 text-rose-400" />
-                    <span className="text-rose-300">No Eulerian Walk</span>
+                    <X className="w-4 h-4 text-red-600" />
+                    <span>No Eulerian Walk</span>
                   </>
                 )}
               </div>
-              <p className="text-zinc-400 text-[11px] leading-relaxed">{eulerian.explanation}</p>
+              <p className="text-[11px] leading-relaxed">{eulerian.explanation}</p>
             </div>
 
             {/* Sequence */}
             {eulerian.pathNodes.length > 0 && (
               <div className="space-y-1">
-                <span className="text-[11px] font-mono text-zinc-500">Traversal Sequence:</span>
-                <div className="flex flex-wrap gap-1 p-2 rounded bg-zinc-900 border border-zinc-800 text-xs font-mono">
+                <span className="text-[11px] font-mono text-gray-600 font-bold">Traversal Sequence:</span>
+                <div className="flex flex-wrap gap-1 p-2 bg-gray-50 border border-gray-300 text-xs font-mono">
                   {eulerian.pathNodes.map((nodeId, idx) => (
                     <button
                       key={`${nodeId}-${idx}`}
@@ -331,10 +331,10 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
                         setIsPlaying(false);
                         setCurrentStepIdx(Math.max(0, idx - 1));
                       }}
-                      className={`px-1.5 py-0.5 rounded text-[11px] ${
+                      className={`px-1.5 py-0.5 border text-[11px] ${
                         currentStepIdx >= 0 && idx === currentStepIdx + 1
-                          ? 'bg-emerald-600 text-white font-bold'
-                          : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+                          ? 'bg-green-600 text-white font-bold border-green-700'
+                          : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-100'
                       }`}
                     >
                       {nodeId}
@@ -347,7 +347,7 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
             {/* Steps list */}
             {eulerian.detailedSteps.length > 0 && (
               <div className="space-y-1">
-                <span className="text-[11px] font-mono text-zinc-500">Step Log:</span>
+                <span className="text-[11px] font-mono text-gray-600 font-bold">Step Log:</span>
                 <div className="space-y-0.5 max-h-56 overflow-y-auto">
                   {eulerian.detailedSteps.map((s, idx) => (
                     <button
@@ -356,16 +356,16 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
                         setIsPlaying(false);
                         setCurrentStepIdx(idx);
                       }}
-                      className={`w-full text-left px-2 py-1 rounded border text-[11px] font-mono flex items-center justify-between ${
+                      className={`w-full text-left px-2 py-1 border text-[11px] font-mono flex items-center justify-between ${
                         currentStepIdx === idx
-                          ? 'bg-zinc-800 border-zinc-600 text-zinc-100'
-                          : 'bg-zinc-900/60 border-zinc-800 text-zinc-400 hover:bg-zinc-800'
+                          ? 'bg-blue-100 border-blue-400 text-blue-900 font-bold'
+                          : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
                       }`}
                     >
                       <span>
                         #{s.step}: {s.fromNodeId} → {s.toNodeId}
                       </span>
-                      <span className="text-zinc-500 text-[10px]">{s.edgeId}</span>
+                      <span className="text-gray-400 text-[10px]">{s.edgeId}</span>
                     </button>
                   ))}
                 </div>
@@ -377,53 +377,53 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
         {activeTab === 'hamiltonian' && (
           <div className="space-y-3">
             <div
-              className={`p-2.5 rounded border ${
+              className={`p-2.5 border ${
                 hamiltonian.hasHamiltonianCircuit
-                  ? 'bg-emerald-950/20 border-emerald-900/60'
+                  ? 'bg-green-50 border-green-300 text-green-900'
                   : hamiltonian.hasHamiltonianPath
-                  ? 'bg-sky-950/20 border-sky-900/60'
-                  : 'bg-zinc-900 border-zinc-800'
+                  ? 'bg-blue-50 border-blue-300 text-blue-900'
+                  : 'bg-gray-100 border-gray-300 text-gray-800'
               }`}
             >
-              <div className="font-semibold text-zinc-200 mb-1 flex items-center gap-1.5">
+              <div className="font-bold mb-1 flex items-center gap-1.5">
                 {hamiltonian.hasHamiltonianCircuit ? (
                   <>
-                    <Check className="w-3.5 h-3.5 text-emerald-400" />
-                    <span className="text-emerald-300">Hamiltonian Circuit Exists</span>
+                    <Check className="w-4 h-4 text-green-600" />
+                    <span>Hamiltonian Circuit Exists</span>
                   </>
                 ) : hamiltonian.hasHamiltonianPath ? (
                   <>
-                    <Check className="w-3.5 h-3.5 text-sky-400" />
-                    <span className="text-sky-300">Hamiltonian Path Exists (No Circuit)</span>
+                    <Check className="w-4 h-4 text-blue-600" />
+                    <span>Hamiltonian Path Exists (No Circuit)</span>
                   </>
                 ) : (
                   <>
-                    <X className="w-3.5 h-3.5 text-rose-400" />
-                    <span className="text-rose-300">No Hamiltonian Walk</span>
+                    <X className="w-4 h-4 text-red-600" />
+                    <span>No Hamiltonian Walk</span>
                   </>
                 )}
               </div>
-              <p className="text-zinc-400 text-[11px] leading-relaxed">{hamiltonian.explanation}</p>
+              <p className="text-[11px] leading-relaxed">{hamiltonian.explanation}</p>
             </div>
 
             {/* Dirac & Ore checks */}
             {hamiltonian.diracConditionSatisfied !== undefined && (
               <div className="grid grid-cols-2 gap-2 text-[11px]">
-                <div className="p-2 rounded bg-zinc-900 border border-zinc-800">
-                  <span className="text-zinc-500 font-mono">Dirac</span>
+                <div className="p-2 bg-gray-50 border border-gray-300">
+                  <span className="text-gray-500 font-mono font-bold">Dirac Condition</span>
                   <div
-                    className={`font-medium mt-0.5 ${
-                      hamiltonian.diracConditionSatisfied ? 'text-emerald-400' : 'text-zinc-400'
+                    className={`font-bold mt-0.5 ${
+                      hamiltonian.diracConditionSatisfied ? 'text-green-700' : 'text-gray-600'
                     }`}
                   >
                     {hamiltonian.diracConditionSatisfied ? 'Satisfied' : 'Not met'}
                   </div>
                 </div>
-                <div className="p-2 rounded bg-zinc-900 border border-zinc-800">
-                  <span className="text-zinc-500 font-mono">Ore</span>
+                <div className="p-2 bg-gray-50 border border-gray-300">
+                  <span className="text-gray-500 font-mono font-bold">Ore Condition</span>
                   <div
-                    className={`font-medium mt-0.5 ${
-                      hamiltonian.oreConditionSatisfied ? 'text-emerald-400' : 'text-zinc-400'
+                    className={`font-bold mt-0.5 ${
+                      hamiltonian.oreConditionSatisfied ? 'text-green-700' : 'text-gray-600'
                     }`}
                   >
                     {hamiltonian.oreConditionSatisfied ? 'Satisfied' : 'Not met'}
@@ -442,10 +442,10 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
                       setHamVariantIdx(0);
                     }}
                     disabled={hamiltonian.circuits.length === 0}
-                    className={`flex-1 py-1 rounded text-xs border ${
+                    className={`flex-1 py-1 text-xs border ${
                       hamVariantType === 'circuit'
-                        ? 'bg-zinc-800 border-zinc-600 text-zinc-100 font-medium'
-                        : 'border-zinc-800 text-zinc-500 hover:text-zinc-300 disabled:opacity-40'
+                        ? 'bg-white border-gray-400 text-gray-900 font-bold'
+                        : 'bg-gray-100 border-gray-300 text-gray-600 hover:bg-white disabled:opacity-40'
                     }`}
                   >
                     Circuits ({hamiltonian.circuits.length})
@@ -456,10 +456,10 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
                       setHamVariantIdx(0);
                     }}
                     disabled={hamiltonian.paths.length === 0}
-                    className={`flex-1 py-1 rounded text-xs border ${
+                    className={`flex-1 py-1 text-xs border ${
                       hamVariantType === 'path'
-                        ? 'bg-zinc-800 border-zinc-600 text-zinc-100 font-medium'
-                        : 'border-zinc-800 text-zinc-500 hover:text-zinc-300 disabled:opacity-40'
+                        ? 'bg-white border-gray-400 text-gray-900 font-bold'
+                        : 'bg-gray-100 border-gray-300 text-gray-600 hover:bg-white disabled:opacity-40'
                     }`}
                   >
                     Paths ({hamiltonian.paths.length})
@@ -477,10 +477,10 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
                           setCurrentStepIdx(sol.edges.length - 1);
                           onHighlightTrace(sol.edges, sol.nodes, undefined, undefined, 'hamiltonian');
                         }}
-                        className={`w-full text-left p-1.5 rounded border text-[11px] font-mono truncate ${
+                        className={`w-full text-left p-1.5 border text-[11px] font-mono truncate ${
                           hamVariantIdx === idx
-                            ? 'bg-zinc-800 border-zinc-600 text-zinc-100'
-                            : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:bg-zinc-800'
+                            ? 'bg-blue-100 border-blue-400 text-blue-900 font-bold'
+                            : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
                         }`}
                       >
                         #{idx + 1}: {sol.nodes.join(' → ')}
@@ -497,15 +497,15 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
           <div className="space-y-2">
             <table className="w-full text-left border-collapse font-mono text-[11px]">
               <thead>
-                <tr className="border-b border-zinc-800 text-zinc-500">
-                  <th className="py-1">Node</th>
+                <tr className="border-b border-gray-300 text-gray-600 bg-gray-100 font-bold">
+                  <th className="py-1 px-1">Node</th>
                   <th className="py-1 text-center">In</th>
                   <th className="py-1 text-center">Out</th>
                   <th className="py-1 text-center">Total</th>
-                  <th className="py-1 text-right">Parity</th>
+                  <th className="py-1 text-right px-1">Parity</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-800">
+              <tbody className="divide-y divide-gray-200">
                 {nodes.map(node => {
                   const info = eulerian.degreeInfo[node.id] || {
                     inDegree: 0,
@@ -514,23 +514,23 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
                     isOdd: false
                   };
                   return (
-                    <tr key={node.id}>
-                      <td className="py-1 text-zinc-200 font-bold flex items-center gap-1.5">
+                    <tr key={node.id} className="hover:bg-gray-50">
+                      <td className="py-1 px-1 text-gray-900 font-bold flex items-center gap-1.5">
                         <span
-                          className="w-2 h-2 rounded-full inline-block shrink-0"
-                          style={{ backgroundColor: node.color || '#3b82f6' }}
+                          className="w-2.5 h-2.5 border border-gray-400 inline-block shrink-0"
+                          style={{ backgroundColor: node.color || '#93c5fd' }}
                         />
                         <span>{node.id}</span>
                       </td>
-                      <td className="py-1 text-center text-zinc-400">{info.inDegree}</td>
-                      <td className="py-1 text-center text-zinc-400">{info.outDegree}</td>
-                      <td className="py-1 text-center text-zinc-200">{info.degree}</td>
-                      <td className="py-1 text-right">
+                      <td className="py-1 text-center text-gray-600">{info.inDegree}</td>
+                      <td className="py-1 text-center text-gray-600">{info.outDegree}</td>
+                      <td className="py-1 text-center text-gray-900 font-bold">{info.degree}</td>
+                      <td className="py-1 text-right px-1">
                         <span
-                          className={`px-1.5 py-0.5 rounded text-[10px] ${
+                          className={`px-1.5 py-0.5 border text-[10px] ${
                             info.isOdd
-                              ? 'bg-amber-950/60 text-amber-300 border border-amber-900/50'
-                              : 'bg-emerald-950/60 text-emerald-300 border border-emerald-900/50'
+                              ? 'bg-amber-100 text-amber-900 border-amber-300 font-bold'
+                              : 'bg-green-100 text-green-900 border-green-300'
                           }`}
                         >
                           {info.isOdd ? 'odd' : 'even'}

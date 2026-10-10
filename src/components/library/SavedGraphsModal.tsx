@@ -1,11 +1,4 @@
 import React, { useRef, useState } from 'react';
-import {
-  X,
-  Upload,
-  Download,
-  Trash2,
-  Plus
-} from 'lucide-react';
 import { GraphData } from '../../types/graph';
 
 interface SavedGraphsModalProps {
@@ -56,33 +49,32 @@ export const SavedGraphsModal: React.FC<SavedGraphsModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
-      <div className="w-full max-w-2xl rounded-lg bg-zinc-900 border border-zinc-800 flex flex-col max-h-[80vh] text-zinc-300 text-xs">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 font-sans">
+      <div className="w-full max-w-2xl bg-white border border-gray-400 flex flex-col max-h-[80vh] text-gray-800 text-xs shadow-lg">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
-          <span className="font-semibold text-zinc-100">Saved Graphs</span>
+        <div className="flex items-center justify-between px-3 py-2 border-b border-gray-300 bg-gray-200">
+          <span className="font-bold text-gray-900 text-sm">Saved Graphs</span>
           <button
             onClick={onClose}
-            className="p-1 rounded text-zinc-400 hover:text-zinc-100"
+            className="text-gray-600 hover:text-black font-bold text-base px-1"
           >
-            <X className="w-4 h-4" />
+            ×
           </button>
         </div>
 
         {/* Toolbar */}
-        <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-800 bg-zinc-900/60">
+        <div className="flex items-center justify-between px-3 py-1.5 border-b border-gray-300 bg-gray-100">
           <button
             onClick={() => {
               onCreateNewGraph();
               onClose();
             }}
-            className="flex items-center gap-1 px-2.5 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 font-medium"
+            className="px-2 py-0.5 bg-gray-200 hover:bg-white text-gray-900 border border-gray-400 font-bold"
           >
-            <Plus className="w-3.5 h-3.5" />
-            <span>New Graph</span>
+            + New Graph
           </button>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <input
               ref={fileInputRef}
               type="file"
@@ -92,51 +84,49 @@ export const SavedGraphsModal: React.FC<SavedGraphsModalProps> = ({
             />
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-1 px-2.5 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700"
+              className="px-2 py-0.5 bg-gray-100 hover:bg-white text-gray-800 border border-gray-400"
             >
-              <Upload className="w-3.5 h-3.5" />
-              <span>Import</span>
+              Import JSON
             </button>
             <button
               onClick={onExportAll}
-              className="flex items-center gap-1 px-2.5 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700"
+              className="px-2 py-0.5 bg-gray-100 hover:bg-white text-gray-800 border border-gray-400"
             >
-              <Download className="w-3.5 h-3.5" />
-              <span>Export All</span>
+              Export All
             </button>
           </div>
         </div>
 
         {importStatus && (
-          <div className="px-4 py-1.5 bg-zinc-800 text-zinc-300 border-b border-zinc-700 text-[11px]">
+          <div className="px-3 py-1 bg-yellow-50 text-yellow-900 border-b border-yellow-200 text-[11px]">
             {importStatus}
           </div>
         )}
 
         {/* List */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-2">
+        <div className="flex-1 overflow-y-auto p-3 space-y-2">
           {savedGraphs.map(g => {
             const isActive = g.id === activeGraphId;
             return (
               <div
                 key={g.id}
-                className={`p-3 rounded border flex items-center justify-between transition-colors ${
+                className={`p-2.5 border flex items-center justify-between ${
                   isActive
-                    ? 'bg-zinc-800/80 border-zinc-600 text-zinc-100'
-                    : 'bg-zinc-950/60 border-zinc-800/80 text-zinc-400 hover:border-zinc-700'
+                    ? 'bg-blue-50 border-blue-400 text-gray-900'
+                    : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
                 }`}
               >
                 <div className="min-w-0 pr-3">
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-zinc-200 text-xs truncate">{g.name}</span>
+                    <span className="font-bold text-gray-900 text-xs truncate">{g.name}</span>
                     {isActive && (
-                      <span className="text-[10px] text-zinc-400 font-mono">[active]</span>
+                      <span className="text-[10px] text-blue-700 font-bold font-mono">[active]</span>
                     )}
                   </div>
                   {g.description && (
-                    <p className="text-[11px] text-zinc-500 truncate mt-0.5">{g.description}</p>
+                    <p className="text-[11px] text-gray-500 truncate mt-0.5">{g.description}</p>
                   )}
-                  <div className="text-[10px] text-zinc-500 font-mono mt-1">
+                  <div className="text-[10px] text-gray-500 font-mono mt-1">
                     {g.nodes.length} nodes • {g.edges.length} edges
                   </div>
                 </div>
@@ -145,7 +135,7 @@ export const SavedGraphsModal: React.FC<SavedGraphsModalProps> = ({
                   <button
                     onClick={() => onExportSingle(g)}
                     title="Export as JSON"
-                    className="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-[11px] border border-zinc-700"
+                    className="px-2 py-0.5 bg-gray-100 hover:bg-white text-gray-700 text-[11px] border border-gray-400"
                   >
                     Export
                   </button>
@@ -155,10 +145,10 @@ export const SavedGraphsModal: React.FC<SavedGraphsModalProps> = ({
                       onSelectGraph(g);
                       onClose();
                     }}
-                    className={`px-2.5 py-1 rounded text-[11px] font-medium border ${
+                    className={`px-2 py-0.5 text-[11px] font-bold border ${
                       isActive
-                        ? 'bg-zinc-700 text-zinc-200 border-zinc-600'
-                        : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700'
+                        ? 'bg-blue-600 text-white border-blue-700'
+                        : 'bg-gray-100 hover:bg-white text-gray-800 border-gray-400'
                     }`}
                   >
                     {isActive ? 'Loaded' : 'Load'}
@@ -167,9 +157,9 @@ export const SavedGraphsModal: React.FC<SavedGraphsModalProps> = ({
                   <button
                     onClick={() => onDeleteGraph(g.id)}
                     title="Delete graph"
-                    className="p-1 rounded text-zinc-500 hover:text-rose-400 hover:bg-zinc-800"
+                    className="px-1 text-gray-400 hover:text-red-700 font-bold"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    ×
                   </button>
                 </div>
               </div>
