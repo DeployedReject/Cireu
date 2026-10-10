@@ -1,13 +1,8 @@
-import React, { useState, useMemo, useRef, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Grid,
-  Columns,
-  ListTree,
   ChevronDown,
-  ChevronUp,
-  Trash2,
-  CheckCircle2
+  ChevronUp
 } from 'lucide-react';
 import {
   GraphData,
@@ -69,8 +64,6 @@ export function App() {
   const [activeStepNodeId, setActiveStepNodeId] = useState<string | undefined>(undefined);
   const [activeFromNodeId, setActiveFromNodeId] = useState<string | undefined>(undefined);
   const [playbackMode, setPlaybackMode] = useState<'eulerian' | 'hamiltonian' | null>(null);
-
-  const quickImportInputRef = useRef<HTMLInputElement | null>(null);
 
   const triggerToast = useCallback((msg: string) => {
     setToastMessage(msg);
@@ -357,18 +350,6 @@ export function App() {
     triggerToast(`Created "${newGraph.name}"`);
   };
 
-  const handleDuplicateGraph = () => {
-    const copy: GraphData = {
-      ...activeGraph,
-      id: `graph-${Date.now()}`,
-      name: `${activeGraph.name} (Copy)`,
-      createdAt: Date.now(),
-      updatedAt: Date.now()
-    };
-    commitGraphUpdate(copy);
-    triggerToast(`Duplicated as "${copy.name}"`);
-  };
-
   const handleDeleteSavedGraph = (id: string) => {
     const remaining = deleteGraph(id);
     setSavedGraphs(remaining);
@@ -417,19 +398,6 @@ export function App() {
     return { success: res.success, message: res.message };
   };
 
-  const handleQuickImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => {
-      if (typeof ev.target?.result === 'string') {
-        handleImportJsonString(ev.target.result);
-      }
-    };
-    reader.readAsText(file);
-    e.target.value = '';
-  };
-
   const handleHighlightTrace = useCallback(
     (
       edgeIds: string[],
@@ -450,16 +418,7 @@ export function App() {
   );
 
   return (
-    <div className="flex flex-col h-screen w-screen bg-[#0c0d0e] text-zinc-100 overflow-hidden">
-      {/* Hidden input for Quick Import button in Header */}
-      <input
-        ref={quickImportInputRef}
-        type="file"
-        accept=".json,application/json"
-        onChange={handleQuickImportFile}
-        className="hidden"
-      />
-
+    <div className="flex flex-col h-screen w-screen bg-[#0e0f11] text-zinc-200 overflow-hidden">
       {/* Top Navigation Header */}
       <Header
         activeGraph={activeGraph}
@@ -472,11 +431,8 @@ export function App() {
           saveGraph(g);
         }}
         onCreateNewGraph={handleCreateNewGraph}
-        onDuplicateGraph={handleDuplicateGraph}
         onOpenLibraryModal={() => setIsLibraryModalOpen(true)}
         onExportAll={handleExportAll}
-        onQuickImportClick={() => quickImportInputRef.current?.click()}
-        lastSavedAt={activeGraph.updatedAt}
       />
 
       {/* Main Studio Body */}
@@ -509,28 +465,27 @@ export function App() {
                 />
               </div>
 
-              {/* Lower Synchronized Table Dock (Adjacency Matrix & Edge Table) */}
+              {/* Lower Synchronized Table Dock */}
               <div
-                className={`border-t border-zinc-800/90 bg-[#141517] flex flex-col transition-all duration-200 ${
-                  isBottomDockOpen ? 'h-[310px]' : 'h-10'
+                className={`border-t border-zinc-800 bg-[#111214] flex flex-col transition-all duration-200 ${
+                  isBottomDockOpen ? 'h-[290px]' : 'h-9'
                 }`}
               >
                 {/* Dock Header Bar */}
-                <div className="h-10 px-4 border-b border-zinc-800/80 flex items-center justify-between select-none shrink-0">
-                  <div className="flex items-center gap-2">
+                <div className="h-9 px-3 border-b border-zinc-800 flex items-center justify-between select-none shrink-0 bg-zinc-900/50">
+                  <div className="flex items-center gap-1">
                     <button
                       onClick={() => {
                         setBottomDockTab('matrix');
                         setIsBottomDockOpen(true);
                       }}
-                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                      className={`px-2.5 py-1 rounded text-xs transition-colors ${
                         bottomDockTab === 'matrix' && isBottomDockOpen
-                          ? 'bg-orange-500/15 text-orange-400 border border-orange-500/30'
+                          ? 'bg-zinc-800 text-zinc-100 font-medium'
                           : 'text-zinc-400 hover:text-zinc-200'
                       }`}
                     >
-                      <Grid className="w-3.5 h-3.5" />
-                      Adjacency Table ({activeGraph.nodes.length}×{activeGraph.nodes.length})
+                      Adjacency
                     </button>
 
                     <button
@@ -538,14 +493,13 @@ export function App() {
                         setBottomDockTab('incidence');
                         setIsBottomDockOpen(true);
                       }}
-                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                      className={`px-2.5 py-1 rounded text-xs transition-colors ${
                         bottomDockTab === 'incidence' && isBottomDockOpen
-                          ? 'bg-orange-500/15 text-orange-400 border border-orange-500/30'
+                          ? 'bg-zinc-800 text-zinc-100 font-medium'
                           : 'text-zinc-400 hover:text-zinc-200'
                       }`}
                     >
-                      <Columns className="w-3.5 h-3.5" />
-                      Incidence Table ({activeGraph.nodes.length}×{activeGraph.edges.length})
+                      Incidence
                     </button>
 
                     <button
@@ -553,40 +507,27 @@ export function App() {
                         setBottomDockTab('edges');
                         setIsBottomDockOpen(true);
                       }}
-                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                      className={`px-2.5 py-1 rounded text-xs transition-colors ${
                         bottomDockTab === 'edges' && isBottomDockOpen
-                          ? 'bg-orange-500/15 text-orange-400 border border-orange-500/30'
+                          ? 'bg-zinc-800 text-zinc-100 font-medium'
                           : 'text-zinc-400 hover:text-zinc-200'
                       }`}
                     >
-                      <ListTree className="w-3.5 h-3.5" />
-                      Edge Table ({activeGraph.edges.length})
+                      Edges ({activeGraph.edges.length})
                     </button>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() =>
-                        commitGraphUpdate({ ...activeGraph, nodes: [], edges: [] })
-                      }
-                      className="flex items-center gap-1 px-2 py-1 rounded text-[11px] text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                      Clear Graph
-                    </button>
-
-                    <button
-                      onClick={() => setIsBottomDockOpen(o => !o)}
-                      className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition-colors"
-                      title={isBottomDockOpen ? 'Collapse Table Dock' : 'Expand Table Dock'}
-                    >
-                      {isBottomDockOpen ? (
-                        <ChevronDown className="w-4 h-4" />
-                      ) : (
-                        <ChevronUp className="w-4 h-4" />
-                      )}
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => setIsBottomDockOpen(o => !o)}
+                    className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200"
+                    title={isBottomDockOpen ? 'Collapse' : 'Expand'}
+                  >
+                    {isBottomDockOpen ? (
+                      <ChevronDown className="w-3.5 h-3.5" />
+                    ) : (
+                      <ChevronUp className="w-3.5 h-3.5" />
+                    )}
+                  </button>
                 </div>
 
                 {/* Dock Body */}
@@ -736,17 +677,16 @@ export function App() {
         onImportJsonString={handleImportJsonString}
       />
 
-      {/* Floating Toast Notification */}
+      {/* Toast Notification */}
       <AnimatePresence>
         {toastMessage && (
           <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-5 right-5 z-50 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-900 border border-orange-500/40 text-xs font-medium text-zinc-100 shadow-2xl"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="fixed bottom-4 right-4 z-50 px-3 py-1.5 rounded bg-zinc-900 border border-zinc-700 text-xs text-zinc-200"
           >
-            <CheckCircle2 className="w-4 h-4 text-orange-400 shrink-0" />
-            <span>{toastMessage}</span>
+            {toastMessage}
           </motion.div>
         )}
       </AnimatePresence>
