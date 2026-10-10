@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   MousePointer,
   PlusCircle,
@@ -11,9 +10,6 @@ import {
   ZoomOut,
   Maximize2,
   Grid,
-  Sparkles,
-  RotateCcw,
-  ArrowLeftRight,
   CircleDot,
   Compass,
   LayoutGrid
@@ -39,7 +35,6 @@ interface GraphCanvasProps {
   onDeleteEdge: (id: string) => void;
   onBulkUpdateNodes: (nodes: GraphNode[]) => void;
   degreeInfo: Record<string, NodeDegreeInfo>;
-  // Playback highlighting
   highlightedEdgeIds: string[];
   activeStepEdgeId?: string;
   highlightedNodeIds: string[];
@@ -47,17 +42,6 @@ interface GraphCanvasProps {
   activeFromNodeId?: string;
   playbackMode?: 'eulerian' | 'hamiltonian' | null;
 }
-
-const NODE_COLORS = [
-  '#3b82f6', // Google Blue
-  '#f6821f', // Cloudflare Orange
-  '#10b981', // Emerald
-  '#ec4899', // Pink
-  '#8b5cf6', // Violet
-  '#eab308', // Amber
-  '#06b6d4', // Cyan
-  '#f43f5e'  // Rose
-];
 
 export const GraphCanvas: React.FC<GraphCanvasProps> = ({
   nodes,
@@ -76,8 +60,7 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
   activeStepEdgeId,
   highlightedNodeIds,
   activeStepNodeId,
-  activeFromNodeId,
-  playbackMode
+  activeFromNodeId
 }) => {
   const svgRef = useRef<SVGSVGElement | null>(null);
 
@@ -98,7 +81,6 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
   const [connectingSourceId, setConnectingSourceId] = useState<string | null>(null);
   const [mouseWorldPos, setMouseWorldPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
-  // Convert screen coordinates to SVG world coordinates
   const screenToWorld = (clientX: number, clientY: number) => {
     if (!svgRef.current) return { x: 0, y: 0 };
     const rect = svgRef.current.getBoundingClientRect();
@@ -110,12 +92,10 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
     };
   };
 
-  // Clear connecting source when switching tools
   useEffect(() => {
     setConnectingSourceId(null);
   }, [activeTool]);
 
-  // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (
@@ -141,10 +121,10 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
         setActiveTool('select');
       } else if (e.key === 'n' || e.key === '2') {
         setActiveTool('node');
-      } else if (e.key === 'd' || e.key === '3') {
-        setActiveTool('directed-edge');
-      } else if (e.key === 'u' || e.key === '4') {
+      } else if (e.key === 'u' || e.key === '3') {
         setActiveTool('undirected-edge');
+      } else if (e.key === 'd' || e.key === '4') {
+        setActiveTool('directed-edge');
       } else if (e.key === 'e' || e.key === '5') {
         setActiveTool('erase');
       }
@@ -159,7 +139,6 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
     return m;
   }, [nodes]);
 
-  // Group parallel edges between the same unordered pair of vertices so we can curve them cleanly
   const edgeGeometryMap = useMemo(() => {
     const pairGroups = new Map<string, GraphEdge[]>();
     for (const e of edges) {
@@ -177,13 +156,6 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
         reversedPathD: string;
         labelX: number;
         labelY: number;
-        isSelfLoop: boolean;
-        ux: number;
-        uy: number;
-        vx: number;
-        vy: number;
-        midX: number;
-        midY: number;
       }
     >();
 
@@ -196,32 +168,25 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
 
         // Self-loop geometry
         if (edge.source === edge.target) {
-          const loopRadius = 28 + idx * 14;
+          const loopRadius = 26 + idx * 14;
           const x = u.x;
-          const y = u.y - 22;
-          const pathD = `M ${x - 12} ${y + 4} C ${x - loopRadius * 1.4} ${
-            y - loopRadius * 1.8
-          }, ${x + loopRadius * 1.4} ${y - loopRadius * 1.8}, ${x + 12} ${y + 4}`;
-          const reversedPathD = `M ${x + 12} ${y + 4} C ${x + loopRadius * 1.4} ${
-            y - loopRadius * 1.8
-          }, ${x - loopRadius * 1.4} ${y - loopRadius * 1.8}, ${x - 12} ${y + 4}`;
+          const y = u.y - 20;
+          const pathD = `M ${x - 10} ${y + 2} C ${x - loopRadius * 1.3} ${
+            y - loopRadius * 1.6
+          }, ${x + loopRadius * 1.3} ${y - loopRadius * 1.6}, ${x + 10} ${y + 2}`;
+          const reversedPathD = `M ${x + 10} ${y + 2} C ${x + loopRadius * 1.3} ${
+            y - loopRadius * 1.6
+          }, ${x - loopRadius * 1.3} ${y - loopRadius * 1.6}, ${x - 10} ${y + 2}`;
+
           geom.set(edge.id, {
             pathD,
             reversedPathD,
             labelX: x,
-            labelY: y - loopRadius * 1.35,
-            isSelfLoop: true,
-            ux: u.x,
-            uy: u.y,
-            vx: v.x,
-            vy: v.y,
-            midX: x,
-            midY: y - loopRadius * 1.8
+            labelY: y - loopRadius * 1.25
           });
           return;
         }
 
-        // Canonical vector between minId and maxId so curve offsets are deterministic
         const isCanonicalDir = edge.source < edge.target;
         const p1 = isCanonicalDir ? u : v;
         const p2 = isCanonicalDir ? v : u;
@@ -230,16 +195,13 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
         const dy = p2.y - p1.y;
         const dist = Math.max(1, Math.sqrt(dx * dx + dy * dy));
 
-        // Normal perpendicular vector
         const nx = -dy / dist;
         const ny = dx / dist;
 
-        // Offset index centered around 0
         const centeredIndex = idx - (count - 1) / 2;
-        const curveSpread = count === 1 ? 0 : centeredIndex * 46;
+        const curveSpread = count === 1 ? 0 : centeredIndex * 42;
 
-        // Shorten endpoints slightly so arrowheads sit cleanly on node boundary (radius = 24)
-        const nodeRadius = 24;
+        const nodeRadius = 22;
         const ux = u.x;
         const uy = u.y;
         const vx = v.x;
@@ -248,7 +210,6 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
         const midX = (ux + vx) / 2 + nx * curveSpread;
         const midY = (uy + vy) / 2 + ny * curveSpread;
 
-        // Vector from control point to target v
         const toVdx = vx - midX;
         const toVdy = vy - midY;
         const toVDist = Math.max(1, Math.sqrt(toVdx * toVdx + toVdy * toVdy));
@@ -272,7 +233,6 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
             ? `M ${targetEndX} ${targetEndY} L ${sourceStartX} ${sourceStartY}`
             : `M ${targetEndX} ${targetEndY} Q ${midX} ${midY} ${sourceStartX} ${sourceStartY}`;
 
-        // Point on quadratic bezier at t = 0.5
         const labelX =
           count === 1
             ? (sourceStartX + targetEndX) / 2
@@ -286,14 +246,7 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
           pathD,
           reversedPathD,
           labelX,
-          labelY,
-          isSelfLoop: false,
-          ux: sourceStartX,
-          uy: sourceStartY,
-          vx: targetEndX,
-          vy: targetEndY,
-          midX,
-          midY
+          labelY
         });
       });
     }
@@ -369,12 +322,6 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
       return;
     }
 
-    // Shift+Click in select mode connects from currently selected node!
-    if (activeTool === 'select' && e.shiftKey && selectedNodeId) {
-      onAddEdge(selectedNodeId, nodeId, false);
-      return;
-    }
-
     setSelectedNodeId(nodeId);
     setSelectedEdgeId(null);
   };
@@ -382,11 +329,9 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
   const handleNodeMouseDown = (e: React.MouseEvent, nodeId: string) => {
     e.stopPropagation();
     if (activeTool === 'select' || activeTool === 'node') {
-      if (!e.shiftKey) {
-        setDraggingNodeId(nodeId);
-        setSelectedNodeId(nodeId);
-        setSelectedEdgeId(null);
-      }
+      setDraggingNodeId(nodeId);
+      setSelectedNodeId(nodeId);
+      setSelectedEdgeId(null);
     }
   };
 
@@ -407,144 +352,107 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
     const h = rect ? rect.height : 600;
     const updated = computeLayout(nodes, edges, type, w, h);
     onBulkUpdateNodes(updated);
-    setPan({ x: 0, y: 0 });
-    setZoom(1);
-  };
-
-  const handleFitView = () => {
-    setPan({ x: 0, y: 0 });
-    setZoom(1);
   };
 
   const selectedNode = selectedNodeId ? nodeMap.get(selectedNodeId) : null;
   const selectedEdge = selectedEdgeId ? edges.find(e => e.id === selectedEdgeId) : null;
 
-  const toolItems: { id: CanvasTool; label: string; shortcut: string; icon: React.ReactNode }[] = [
-    { id: 'select', label: 'Select / Drag', shortcut: 'V', icon: <MousePointer className="w-4 h-4" /> },
-    { id: 'node', label: 'Add Vertex', shortcut: 'N', icon: <PlusCircle className="w-4 h-4" /> },
-    { id: 'undirected-edge', label: 'Undirected Edge', shortcut: 'U', icon: <Minus className="w-4 h-4" /> },
-    { id: 'directed-edge', label: 'Directed Edge', shortcut: 'D', icon: <ArrowUpRight className="w-4 h-4" /> },
-    { id: 'erase', label: 'Delete Element', shortcut: 'E', icon: <Trash2 className="w-4 h-4" /> },
-    { id: 'pan', label: 'Pan Canvas', shortcut: 'H', icon: <Hand className="w-4 h-4" /> }
+  const toolItems: { id: CanvasTool; label: string; icon: React.ReactNode }[] = [
+    { id: 'select', label: 'Select', icon: <MousePointer className="w-3.5 h-3.5" /> },
+    { id: 'node', label: 'Node', icon: <PlusCircle className="w-3.5 h-3.5" /> },
+    { id: 'undirected-edge', label: 'Edge', icon: <Minus className="w-3.5 h-3.5" /> },
+    { id: 'directed-edge', label: 'Directed', icon: <ArrowUpRight className="w-3.5 h-3.5" /> },
+    { id: 'erase', label: 'Erase', icon: <Trash2 className="w-3.5 h-3.5" /> },
+    { id: 'pan', label: 'Pan', icon: <Hand className="w-3.5 h-3.5" /> }
   ];
 
   return (
-    <div className="relative w-full h-full flex flex-col bg-[#0c0d0e] overflow-hidden select-none">
-      {/* Top Floating Canvas Toolbar (Cloudflare / Google Cloud Console style) */}
-      <div className="absolute top-3 left-3 right-3 z-20 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
-        {/* Left: Drawing Tools */}
-        <div className="flex items-center gap-1 p-1 rounded-lg bg-[#141517]/95 border border-zinc-800/90 shadow-xl backdrop-blur-md pointer-events-auto">
+    <div className="relative w-full h-full flex flex-col bg-[#0e0f11] overflow-hidden select-none">
+      {/* Flat Toolbar */}
+      <div className="absolute top-2 left-2 right-2 z-20 flex items-center justify-between gap-2 pointer-events-none">
+        {/* Left: Tools */}
+        <div className="flex items-center gap-0.5 p-0.5 rounded bg-zinc-900 border border-zinc-800 pointer-events-auto">
           {toolItems.map(tool => {
             const isActive = activeTool === tool.id;
             return (
               <button
                 key={tool.id}
                 onClick={() => setActiveTool(tool.id)}
-                title={`${tool.label} (${tool.shortcut})`}
-                className={`relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                title={tool.label}
+                className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${
                   isActive
-                    ? 'text-white'
-                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'
+                    ? 'bg-zinc-800 text-zinc-100 font-medium'
+                    : 'text-zinc-400 hover:text-zinc-200'
                 }`}
               >
-                {isActive && (
-                  <motion.div
-                    layoutId="activeCanvasTool"
-                    className="absolute inset-0 bg-gradient-to-b from-orange-500/20 to-orange-600/10 border border-orange-500/40 rounded-md"
-                    transition={{ type: 'spring', stiffness: 450, damping: 32 }}
-                  />
-                )}
-                <span className={`relative z-10 ${isActive ? 'text-orange-400' : ''}`}>
-                  {tool.icon}
-                </span>
-                <span className="relative z-10 hidden sm:inline">{tool.label}</span>
-                <kbd className="relative z-10 hidden md:inline-block text-[10px] font-mono px-1 py-0.2 rounded bg-zinc-900/80 text-zinc-500 border border-zinc-800">
-                  {tool.shortcut}
-                </kbd>
+                {tool.icon}
+                <span className="hidden sm:inline">{tool.label}</span>
               </button>
             );
           })}
         </div>
 
-        {/* Right: Auto-Layout & Viewport Controls */}
-        <div className="flex items-center gap-1.5 pointer-events-auto">
-          {/* Auto-Layout Bar */}
-          <div className="flex items-center gap-0.5 p-1 rounded-lg bg-[#141517]/95 border border-zinc-800/90 shadow-xl backdrop-blur-md">
-            <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-500 px-2 hidden xl:inline">
-              Layout
-            </span>
+        {/* Right: Layout & View Controls */}
+        <div className="flex items-center gap-1 pointer-events-auto">
+          <div className="flex items-center gap-0.5 p-0.5 rounded bg-zinc-900 border border-zinc-800 text-xs">
             <button
               onClick={() => handleAutoLayout('circle')}
               title="Circular Layout"
-              className="flex items-center gap-1 px-2 py-1.5 rounded text-xs text-zinc-300 hover:text-white hover:bg-zinc-800 transition-colors"
+              className="p-1 rounded text-zinc-400 hover:text-zinc-200"
             >
-              <CircleDot className="w-3.5 h-3.5 text-sky-400" />
-              <span className="hidden lg:inline">Circle</span>
+              <CircleDot className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={() => handleAutoLayout('force')}
-              title="Force-Directed Spring Layout"
-              className="flex items-center gap-1 px-2 py-1.5 rounded text-xs text-zinc-300 hover:text-white hover:bg-zinc-800 transition-colors"
+              title="Spring Layout"
+              className="p-1 rounded text-zinc-400 hover:text-zinc-200"
             >
-              <Compass className="w-3.5 h-3.5 text-orange-400" />
-              <span className="hidden lg:inline">Spring</span>
+              <Compass className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={() => handleAutoLayout('grid')}
               title="Grid Layout"
-              className="flex items-center gap-1 px-2 py-1.5 rounded text-xs text-zinc-300 hover:text-white hover:bg-zinc-800 transition-colors"
+              className="p-1 rounded text-zinc-400 hover:text-zinc-200"
             >
-              <LayoutGrid className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="hidden lg:inline">Grid</span>
+              <LayoutGrid className="w-3.5 h-3.5" />
             </button>
-          </div>
-
-          {/* Canvas Toggles & Zoom */}
-          <div className="flex items-center gap-0.5 p-1 rounded-lg bg-[#141517]/95 border border-zinc-800/90 shadow-xl backdrop-blur-md">
+            <div className="w-px h-3.5 bg-zinc-800 mx-0.5" />
             <button
               onClick={() => setSnapToGrid(s => !s)}
-              title="Toggle 20px Coordinate Grid Snap"
-              className={`p-1.5 rounded text-xs transition-colors ${
-                snapToGrid
-                  ? 'bg-sky-500/15 text-sky-400 border border-sky-500/30'
-                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800'
-              }`}
+              title="Grid Snap"
+              className={`p-1 rounded ${snapToGrid ? 'text-zinc-200 bg-zinc-800' : 'text-zinc-500'}`}
             >
               <Grid className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={() => setShowDegreesOnCanvas(d => !d)}
-              title="Toggle Vertex Degree Badges on Canvas"
-              className={`px-2 py-1 rounded text-[11px] font-mono transition-colors ${
-                showDegreesOnCanvas
-                  ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
-                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800'
+              title="Toggle Degrees"
+              className={`px-1.5 py-0.5 rounded text-[11px] font-mono ${
+                showDegreesOnCanvas ? 'text-zinc-200 bg-zinc-800' : 'text-zinc-500'
               }`}
             >
-              deg(v)
+              deg
             </button>
-            <div className="w-px h-4 bg-zinc-800 mx-0.5" />
+            <div className="w-px h-3.5 bg-zinc-800 mx-0.5" />
             <button
               onClick={() => setZoom(z => Math.max(0.4, +(z - 0.15).toFixed(2)))}
-              title="Zoom Out"
-              className="p-1.5 rounded text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition-colors"
+              className="p-1 rounded text-zinc-400 hover:text-zinc-200"
             >
               <ZoomOut className="w-3.5 h-3.5" />
             </button>
-            <span className="text-[11px] font-mono text-zinc-400 min-w-[42px] text-center">
-              {Math.round(zoom * 100)}%
-            </span>
             <button
               onClick={() => setZoom(z => Math.min(2.2, +(z + 0.15).toFixed(2)))}
-              title="Zoom In"
-              className="p-1.5 rounded text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition-colors"
+              className="p-1 rounded text-zinc-400 hover:text-zinc-200"
             >
               <ZoomIn className="w-3.5 h-3.5" />
             </button>
             <button
-              onClick={handleFitView}
-              title="Reset Viewport"
-              className="p-1.5 rounded text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition-colors"
+              onClick={() => {
+                setPan({ x: 0, y: 0 });
+                setZoom(1);
+              }}
+              title="Reset View"
+              className="p-1 rounded text-zinc-400 hover:text-zinc-200"
             >
               <Maximize2 className="w-3.5 h-3.5" />
             </button>
@@ -552,38 +460,7 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
         </div>
       </div>
 
-      {/* Contextual Hint Banner when connecting edges */}
-      <AnimatePresence>
-        {(activeTool === 'directed-edge' || activeTool === 'undirected-edge') && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="absolute top-16 left-1/2 -translate-x-1/2 z-20 px-3.5 py-1.5 rounded-full bg-zinc-900/95 border border-orange-500/40 text-xs text-zinc-200 shadow-lg flex items-center gap-2 pointer-events-none"
-          >
-            <span className="w-2 h-2 rounded-full bg-orange-500 animate-ping" />
-            {connectingSourceId ? (
-              <span>
-                Connecting from{' '}
-                <strong className="text-orange-400 font-mono">
-                  {nodeMap.get(connectingSourceId)?.label || connectingSourceId}
-                </strong>{' '}
-                — click any target vertex (or same vertex for self-loop). Press Esc to cancel.
-              </span>
-            ) : (
-              <span>
-                Click a source vertex to start drawing a{' '}
-                <strong className="text-orange-400">
-                  {activeTool === 'directed-edge' ? 'directed (u → v)' : 'undirected (u — v)'}
-                </strong>{' '}
-                edge.
-              </span>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Main Interactive SVG Canvas */}
+      {/* SVG Canvas */}
       <svg
         ref={svgRef}
         onMouseDown={handleCanvasMouseDown}
@@ -600,7 +477,6 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
         }`}
       >
         <defs>
-          {/* Subtle Technical Dot & Line Grid Pattern */}
           <pattern
             id="cireu-grid"
             width={20 * zoom}
@@ -608,10 +484,9 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
             patternUnits="userSpaceOnUse"
             patternTransform={`translate(${pan.x % (20 * zoom)}, ${pan.y % (20 * zoom)})`}
           >
-            <circle cx="1" cy="1" r="1" fill="#27272a" />
+            <circle cx="1" cy="1" r="1" fill="#222326" />
           </pattern>
 
-          {/* Arrowhead markers for normal, selected, and highlighted edges */}
           <marker
             id="arrow-default"
             viewBox="0 0 10 10"
@@ -621,291 +496,133 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
             markerHeight="6"
             orient="auto-start-reverse"
           >
-            <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#71717a" />
+            <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#64748b" />
           </marker>
           <marker
             id="arrow-selected"
             viewBox="0 0 10 10"
             refX="7"
             refY="5"
-            markerWidth="6.5"
-            markerHeight="6.5"
+            markerWidth="6"
+            markerHeight="6"
             orient="auto-start-reverse"
           >
             <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#38bdf8" />
           </marker>
           <marker
-            id="arrow-highlight"
-            viewBox="0 0 10 10"
-            refX="7"
-            refY="5"
-            markerWidth="6.5"
-            markerHeight="6.5"
-            orient="auto-start-reverse"
-          >
-            <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#f6821f" />
-          </marker>
-          <marker
-            id="arrow-active-step"
-            viewBox="0 0 10 10"
-            refX="7"
-            refY="5"
-            markerWidth="8"
-            markerHeight="8"
-            orient="auto-start-reverse"
-          >
-            <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#22c55e" />
-          </marker>
-
-          {/* Dynamic Walk Traversal Arrowhead Marker */}
-          <marker
             id="arrow-walk-direction"
             viewBox="0 0 10 10"
             refX="7.5"
             refY="5"
-            markerWidth="9"
-            markerHeight="9"
+            markerWidth="7"
+            markerHeight="7"
             orient="auto"
           >
-            <path d="M 0 1 L 9 5 L 0 9 z" fill="#4ade80" />
+            <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#22c55e" />
           </marker>
-
-          {/* Intense Glow Filter for Active Traversal Edge */}
-          <filter id="walk-glow" x="-40%" y="-40%" width="180%" height="180%">
-            <feGaussianBlur stdDeviation="4.5" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-
-          {/* Pulse Glow for Source Node */}
-          <filter id="source-glow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="3.5" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
         </defs>
 
-        {/* Background Grid Rect */}
         <rect width="100%" height="100%" fill="url(#cireu-grid)" />
 
-        {/* Transformed World Group */}
         <g transform={`translate(${pan.x}, ${pan.y}) scale(${zoom})`}>
-          {/* Live Rubberband Line when creating an edge */}
           {connectingSourceId && nodeMap.get(connectingSourceId) && (
             <line
               x1={nodeMap.get(connectingSourceId)!.x}
               y1={nodeMap.get(connectingSourceId)!.y}
               x2={mouseWorldPos.x}
               y2={mouseWorldPos.y}
-              stroke="#f6821f"
-              strokeWidth={2.5}
-              strokeDasharray="6 4"
-              markerEnd={activeTool === 'directed-edge' ? 'url(#arrow-highlight)' : undefined}
+              stroke="#94a3b8"
+              strokeWidth={2}
+              strokeDasharray="4 4"
               className="pointer-events-none"
             />
           )}
 
-          {/* Render Edges */}
+          {/* Edges */}
           {edges.map(edge => {
             const geom = edgeGeometryMap.get(edge.id);
             if (!geom) return null;
 
             const isSelected = selectedEdgeId === edge.id;
-            const highlightOrderIndex = highlightedEdgeIds.indexOf(edge.id);
-            const isHighlighted = highlightOrderIndex !== -1;
+            const isHighlighted = highlightedEdgeIds.includes(edge.id);
             const isActiveStep = activeStepEdgeId === edge.id;
 
-            // Determine traversal orientation for active step
-            // If activeFromNodeId is provided, check if edge is traversed in reverse of canonical (source -> target)
             const isReversedTraversal =
               isActiveStep &&
               activeFromNodeId !== undefined &&
               edge.target === activeFromNodeId &&
               edge.source !== activeFromNodeId;
 
-            const activeTraversalD = isReversedTraversal ? geom.reversedPathD : geom.pathD;
+            const edgePath = isReversedTraversal ? geom.reversedPathD : geom.pathD;
 
-            // Count all occurrences of this edge in highlightedEdgeIds
             const stepNumbers: number[] = [];
             highlightedEdgeIds.forEach((id, idx) => {
               if (id === edge.id) stepNumbers.push(idx + 1);
             });
 
             let strokeColor = edge.color || '#52525b';
-            let strokeWidth = 2.2;
+            let strokeWidth = 2;
             let markerEnd: string | undefined = edge.directed ? 'url(#arrow-default)' : undefined;
 
             if (isSelected) {
               strokeColor = '#38bdf8';
-              strokeWidth = 3.2;
+              strokeWidth = 2.5;
               if (edge.directed) markerEnd = 'url(#arrow-selected)';
-            }
-            if (isHighlighted) {
-              strokeColor = '#f6821f';
-              strokeWidth = 3.4;
-              if (edge.directed) markerEnd = 'url(#arrow-highlight)';
-            }
-            if (isActiveStep) {
+            } else if (isActiveStep) {
               strokeColor = '#22c55e';
-              strokeWidth = 4.2;
-              if (edge.directed) markerEnd = 'url(#arrow-active-step)';
+              strokeWidth = 3.5;
+              markerEnd = 'url(#arrow-walk-direction)';
+            } else if (isHighlighted) {
+              strokeColor = '#f97316';
+              strokeWidth = 2.5;
             }
 
             return (
               <g
                 key={edge.id}
                 onClick={e => handleEdgeClick(e, edge.id)}
-                className="group cursor-pointer"
+                className="cursor-pointer"
               >
-                {/* Invisible wider hit target for effortless clicking */}
                 <path
                   d={geom.pathD}
                   fill="none"
                   stroke="transparent"
-                  strokeWidth={18}
+                  strokeWidth={16}
                 />
 
-                {/* Outer Glow Halo for Selected or Highlighted Edges */}
-                {(isHighlighted || isSelected) && !isActiveStep && (
-                  <path
-                    d={geom.pathD}
-                    fill="none"
-                    stroke={isHighlighted ? '#f6821f' : '#38bdf8'}
-                    strokeWidth={strokeWidth + 6}
-                    strokeOpacity={0.2}
-                    strokeLinecap="round"
-                  />
-                )}
-
-                {/* Base Visible Edge Path */}
                 <path
-                  d={geom.pathD}
+                  d={edgePath}
                   fill="none"
                   stroke={strokeColor}
                   strokeWidth={strokeWidth}
                   markerEnd={markerEnd}
                   strokeLinecap="round"
-                  className="transition-colors duration-200 group-hover:stroke-zinc-300"
                 />
 
-                {/* ============================================================ */}
-                {/* ACTIVE WALK TRAVERSAL ANIMATION (Clear direction & beacon)   */}
-                {/* ============================================================ */}
-                {isActiveStep && (
-                  <g className="pointer-events-none">
-                    {/* 1. High-intensity neon green under-glow */}
-                    <path
-                      d={activeTraversalD}
-                      fill="none"
-                      stroke="#22c55e"
-                      strokeWidth={10}
-                      strokeOpacity={0.4}
-                      strokeLinecap="round"
-                      filter="url(#walk-glow)"
-                    />
-
-                    {/* 2. Primary active walk body */}
-                    <path
-                      d={activeTraversalD}
-                      fill="none"
-                      stroke="#4ade80"
-                      strokeWidth={4.5}
-                      strokeLinecap="round"
-                    />
-
-                    {/* 3. Directional animated chevron dash stream */}
-                    <path
-                      d={activeTraversalD}
-                      fill="none"
-                      stroke="#ffffff"
-                      strokeWidth={2.8}
-                      strokeDasharray="8 8"
-                      strokeLinecap="round"
-                    >
-                      <animate
-                        attributeName="stroke-dashoffset"
-                        from="32"
-                        to="0"
-                        dur="0.55s"
-                        repeatCount="indefinite"
-                      />
-                    </path>
-
-                    {/* 4. Directional Arrowhead showing exact traversal flow */}
-                    <path
-                      d={activeTraversalD}
-                      fill="none"
-                      stroke="transparent"
-                      strokeWidth={1}
-                      markerEnd="url(#arrow-walk-direction)"
-                    />
-
-                    {/* 5. Glowing particle packet travelling along edge from source to target */}
-                    <circle r={6} fill="#ffffff" filter="url(#walk-glow)">
-                      <animateMotion
-                        path={activeTraversalD}
-                        dur="0.85s"
-                        repeatCount="indefinite"
-                        rotate="auto"
-                      />
-                    </circle>
-                    <circle r={3.5} fill="#22c55e">
-                      <animateMotion
-                        path={activeTraversalD}
-                        dur="0.85s"
-                        repeatCount="indefinite"
-                        rotate="auto"
-                      />
-                    </circle>
-                  </g>
-                )}
-
-                {/* Edge Label / Weight or Step Order Pill */}
-                {(edge.label || edge.weight !== undefined || stepNumbers.length > 0) && (
+                {(edge.label || stepNumbers.length > 0) && (
                   <g transform={`translate(${geom.labelX}, ${geom.labelY})`}>
                     <rect
-                      x={-24}
-                      y={-12}
-                      width={48}
-                      height={24}
-                      rx={6}
-                      fill={
-                        isActiveStep
-                          ? '#052e16'
-                          : isHighlighted
-                          ? '#431407'
-                          : '#18181b'
-                      }
-                      stroke={
-                        isActiveStep
-                          ? '#22c55e'
-                          : isHighlighted
-                          ? '#f6821f'
-                          : isSelected
-                          ? '#38bdf8'
-                          : '#27272a'
-                      }
-                      strokeWidth={isActiveStep ? 2 : 1.2}
+                      x={-18}
+                      y={-10}
+                      width={36}
+                      height={20}
+                      rx={3}
+                      fill={isActiveStep ? '#052e16' : '#18181b'}
+                      stroke={isActiveStep ? '#22c55e' : '#3f3f46'}
+                      strokeWidth={1}
                     />
                     <text
                       textAnchor="middle"
                       dominantBaseline="central"
-                      className={`text-[10px] font-mono font-bold ${
+                      className={`text-[10px] font-mono ${
                         isActiveStep
-                          ? 'fill-emerald-300'
+                          ? 'fill-emerald-300 font-bold'
                           : isHighlighted
                           ? 'fill-orange-300'
-                          : 'fill-zinc-300'
+                          : 'fill-zinc-400'
                       }`}
                     >
-                      {stepNumbers.length > 0
-                        ? `#${stepNumbers.join(',')}`
-                        : edge.label || edge.weight}
+                      {stepNumbers.length > 0 ? `#${stepNumbers.join(',')}` : edge.label}
                     </text>
                   </g>
                 )}
@@ -913,21 +630,31 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
             );
           })}
 
-          {/* Render Nodes */}
+          {/* Nodes */}
           {nodes.map(node => {
             const isSelected = selectedNodeId === node.id;
             const isConnectingSource = connectingSourceId === node.id;
             const isHighlighted = highlightedNodeIds.includes(node.id);
             const isActiveStepTarget = activeStepNodeId === node.id;
             const isActiveStepSource = activeFromNodeId === node.id;
-            const deg = degreeInfo[node.id] || {
-              inDegree: 0,
-              outDegree: 0,
-              degree: 0,
-              isOdd: false
-            };
+            const deg = degreeInfo[node.id] || { degree: 0, isOdd: false };
 
-            const baseColor = node.color || '#3b82f6';
+            let strokeColor = node.color || '#52525b';
+            let strokeWidth = 1.5;
+
+            if (isActiveStepTarget) {
+              strokeColor = '#22c55e';
+              strokeWidth = 3;
+            } else if (isActiveStepSource) {
+              strokeColor = '#f59e0b';
+              strokeWidth = 2.5;
+            } else if (isSelected) {
+              strokeColor = '#38bdf8';
+              strokeWidth = 2.5;
+            } else if (isConnectingSource || isHighlighted) {
+              strokeColor = '#f97316';
+              strokeWidth = 2;
+            }
 
             return (
               <g
@@ -935,194 +662,75 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
                 transform={`translate(${node.x}, ${node.y})`}
                 onMouseDown={e => handleNodeMouseDown(e, node.id)}
                 onClick={e => handleNodeClick(e, node.id)}
-                className="cursor-pointer group"
+                className="cursor-pointer"
               >
-                {/* Active Walk TARGET Radar Pulse (Neon Green) */}
-                {isActiveStepTarget && (
-                  <circle
-                    r={34}
-                    fill="none"
-                    stroke="#22c55e"
-                    strokeWidth={2.5}
-                    strokeOpacity={0.7}
-                  >
-                    <animate
-                      attributeName="r"
-                      from="24"
-                      to="44"
-                      dur="1.1s"
-                      repeatCount="indefinite"
-                    />
-                    <animate
-                      attributeName="stroke-opacity"
-                      from="0.9"
-                      to="0"
-                      dur="1.1s"
-                      repeatCount="indefinite"
-                    />
-                  </circle>
-                )}
-
-                {/* Active Walk SOURCE Halo (Pulsing Amber) */}
-                {isActiveStepSource && !isActiveStepTarget && (
-                  <circle
-                    r={32}
-                    fill="none"
-                    stroke="#f59e0b"
-                    strokeWidth={2}
-                    strokeDasharray="4 3"
-                    strokeOpacity={0.8}
-                  >
-                    <animate
-                      attributeName="stroke-dashoffset"
-                      from="0"
-                      to="14"
-                      dur="1s"
-                      repeatCount="indefinite"
-                    />
-                  </circle>
-                )}
-
-                {/* Highlight / Selection Halo */}
-                {(isSelected || isConnectingSource || isHighlighted || isActiveStepTarget) && (
-                  <circle
-                    r={29}
-                    fill="none"
-                    stroke={
-                      isActiveStepTarget
-                        ? '#22c55e'
-                        : isConnectingSource || isHighlighted
-                        ? '#f6821f'
-                        : '#38bdf8'
-                    }
-                    strokeWidth={2}
-                    strokeDasharray={isConnectingSource ? '4 3' : undefined}
-                  />
-                )}
-
-                {/* Main Vertex Circle */}
+                {/* Clean Flat Node Circle */}
                 <circle
-                  r={24}
-                  fill="#141517"
-                  stroke={
-                    isActiveStepTarget
-                      ? '#22c55e'
-                      : isActiveStepSource
-                      ? '#f59e0b'
-                      : isHighlighted
-                      ? '#f6821f'
-                      : isSelected
-                      ? '#38bdf8'
-                      : baseColor
-                  }
-                  strokeWidth={
-                    isSelected || isHighlighted || isActiveStepTarget || isActiveStepSource
-                      ? 3
-                      : 2.2
-                  }
-                  className="transition-transform duration-150 group-hover:scale-105"
+                  r={22}
+                  fill="#18181b"
+                  stroke={strokeColor}
+                  strokeWidth={strokeWidth}
                 />
 
-                {/* Subtle Inner Tint */}
-                <circle
-                  r={21}
-                  fill={
-                    isActiveStepTarget
-                      ? '#22c55e'
-                      : isActiveStepSource
-                      ? '#f59e0b'
-                      : isHighlighted
-                      ? '#f6821f'
-                      : baseColor
-                  }
-                  fillOpacity={
-                    isActiveStepTarget
-                      ? 0.28
-                      : isActiveStepSource
-                      ? 0.2
-                      : isHighlighted
-                      ? 0.22
-                      : 0.14
-                  }
-                />
-
-                {/* Short ID inside Vertex */}
+                {/* Node ID */}
                 <text
                   textAnchor="middle"
                   dominantBaseline="central"
-                  className="text-xs font-mono font-bold fill-zinc-100 pointer-events-none"
+                  className="text-xs font-mono font-medium fill-zinc-200 pointer-events-none"
                 >
-                  {node.id.length > 5 ? node.id.slice(0, 5) : node.id}
+                  {node.id}
                 </text>
 
-                {/* Live Traversal Role Pill (FROM / TO) */}
+                {/* Flat FROM / TO indicator */}
                 {(isActiveStepSource || isActiveStepTarget) && (
-                  <g transform="translate(0, -32)" className="pointer-events-none">
+                  <g transform="translate(0, -28)" className="pointer-events-none">
                     <rect
-                      x={-22}
-                      y={-8}
-                      width={44}
-                      height={16}
-                      rx={4}
+                      x={-16}
+                      y={-7}
+                      width={32}
+                      height={14}
+                      rx={2}
                       fill={isActiveStepTarget ? '#052e16' : '#451a03'}
                       stroke={isActiveStepTarget ? '#22c55e' : '#f59e0b'}
-                      strokeWidth={1.2}
-                    />
-                    <text
-                      textAnchor="middle"
-                      dominantBaseline="central"
-                      className={`text-[9px] font-mono font-bold ${
-                        isActiveStepTarget ? 'fill-emerald-300' : 'fill-amber-300'
-                      }`}
-                    >
-                      {isActiveStepTarget ? '→ TO' : 'FROM'}
-                    </text>
-                  </g>
-                )}
-
-                {/* Full Vertex Label Pill Below */}
-                <g transform="translate(0, 36)" className="pointer-events-none">
-                  <rect
-                    x={-Math.max(28, node.label.length * 3.6 + 8)}
-                    y={-9}
-                    width={Math.max(56, node.label.length * 7.2 + 16)}
-                    height={18}
-                    rx={4}
-                    fill="#141517"
-                    fillOpacity={0.9}
-                    stroke="#27272a"
-                    strokeWidth={1}
-                  />
-                  <text
-                    textAnchor="middle"
-                    dominantBaseline="central"
-                    className="text-[11px] font-medium fill-zinc-300"
-                  >
-                    {node.label}
-                  </text>
-                </g>
-
-                {/* Degree Telemetry Badge (Top-Right of Vertex) */}
-                {showDegreesOnCanvas && (
-                  <g transform="translate(19, -19)" className="pointer-events-none">
-                    <rect
-                      x={-14}
-                      y={-8}
-                      width={28}
-                      height={16}
-                      rx={8}
-                      fill={deg.isOdd ? '#451a03' : '#052e16'}
-                      stroke={deg.isOdd ? '#f59e0b' : '#10b981'}
                       strokeWidth={1}
                     />
                     <text
                       textAnchor="middle"
                       dominantBaseline="central"
-                      className={`text-[9px] font-mono font-semibold ${
-                        deg.isOdd ? 'fill-amber-300' : 'fill-emerald-300'
+                      className={`text-[8px] font-mono font-bold ${
+                        isActiveStepTarget ? 'fill-emerald-300' : 'fill-amber-300'
                       }`}
                     >
-                      d:{deg.degree}
+                      {isActiveStepTarget ? 'TO' : 'FROM'}
+                    </text>
+                  </g>
+                )}
+
+                {/* Node Label Below */}
+                <text
+                  x={0}
+                  y={32}
+                  textAnchor="middle"
+                  className="text-[10px] fill-zinc-400 pointer-events-none"
+                >
+                  {node.label}
+                </text>
+
+                {/* Degree indicator */}
+                {showDegreesOnCanvas && (
+                  <g transform="translate(16, -16)" className="pointer-events-none">
+                    <circle
+                      r={7}
+                      fill={deg.isOdd ? '#451a03' : '#18181b'}
+                      stroke={deg.isOdd ? '#f59e0b' : '#3f3f46'}
+                      strokeWidth={1}
+                    />
+                    <text
+                      textAnchor="middle"
+                      dominantBaseline="central"
+                      className="text-[8px] font-mono fill-zinc-300"
+                    >
+                      {deg.degree}
                     </text>
                   </g>
                 )}
@@ -1132,143 +740,63 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
         </g>
       </svg>
 
-      {/* Bottom Floating Inspector Bar for Selected Node or Edge */}
-      <AnimatePresence>
-        {(selectedNode || selectedEdge) && (
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 16 }}
-            className="absolute bottom-3 left-3 z-20 flex flex-wrap items-center gap-3 px-3.5 py-2.5 rounded-xl bg-[#141517]/95 border border-zinc-800 shadow-2xl backdrop-blur-md"
-          >
-            {selectedNode && (
-              <>
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20">
-                    Vertex [{selectedNode.id}]
-                  </span>
-                  <input
-                    type="text"
-                    value={selectedNode.label}
-                    onChange={e => onUpdateNode(selectedNode.id, { label: e.target.value })}
-                    placeholder="Vertex Label"
-                    className="px-2.5 py-1 text-xs rounded-md bg-zinc-900 border border-zinc-700 text-zinc-100 focus:outline-none focus:border-sky-500 w-36"
-                  />
-                </div>
+      {/* Flat Selected Item Inspector */}
+      {(selectedNode || selectedEdge) && (
+        <div className="absolute bottom-2 left-2 z-20 flex items-center gap-2 p-1.5 rounded bg-zinc-900 border border-zinc-800 text-xs text-zinc-300">
+          {selectedNode && (
+            <>
+              <span className="font-mono text-zinc-400">Vertex {selectedNode.id}</span>
+              <input
+                type="text"
+                value={selectedNode.label}
+                onChange={e => onUpdateNode(selectedNode.id, { label: e.target.value })}
+                className="px-2 py-0.5 rounded bg-zinc-950 border border-zinc-700 text-xs text-zinc-200 focus:outline-none w-32"
+              />
+              <button
+                onClick={() => {
+                  onDeleteNode(selectedNode.id);
+                  setSelectedNodeId(null);
+                }}
+                className="px-2 py-0.5 rounded bg-zinc-800 hover:bg-rose-950 hover:text-rose-300 text-zinc-400 text-xs border border-zinc-700"
+              >
+                Delete
+              </button>
+            </>
+          )}
 
-                {/* Color Swatches */}
-                <div className="flex items-center gap-1 border-l border-zinc-800 pl-3">
-                  {NODE_COLORS.map(c => (
-                    <button
-                      key={c}
-                      onClick={() => onUpdateNode(selectedNode.id, { color: c })}
-                      style={{ backgroundColor: c }}
-                      className={`w-4 h-4 rounded-full transition-transform ${
-                        selectedNode.color === c
-                          ? 'scale-125 ring-2 ring-white ring-offset-1 ring-offset-zinc-950'
-                          : 'opacity-75 hover:opacity-100'
-                      }`}
-                    />
-                  ))}
-                </div>
-
-                {/* Degree summary */}
-                {degreeInfo[selectedNode.id] && (
-                  <div className="text-[11px] font-mono text-zinc-400 border-l border-zinc-800 pl-3 flex items-center gap-2">
-                    <span>deg: {degreeInfo[selectedNode.id].degree}</span>
-                    <span className="text-zinc-600">|</span>
-                    <span>in: {degreeInfo[selectedNode.id].inDegree}</span>
-                    <span>out: {degreeInfo[selectedNode.id].outDegree}</span>
-                  </div>
-                )}
-
-                <button
-                  onClick={() => {
-                    onDeleteNode(selectedNode.id);
-                    setSelectedNodeId(null);
-                  }}
-                  className="ml-1 flex items-center gap-1 px-2.5 py-1 rounded-md bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 text-xs transition-colors"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  Delete
-                </button>
-              </>
-            )}
-
-            {selectedEdge && (
-              <>
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/20">
-                    Edge [{selectedEdge.source} {selectedEdge.directed ? '→' : '—'} {selectedEdge.target}]
-                  </span>
-                  <input
-                    type="text"
-                    value={selectedEdge.label || ''}
-                    onChange={e => onUpdateEdge(selectedEdge.id, { label: e.target.value })}
-                    placeholder="Edge label (e.g. Bridge 1)"
-                    className="px-2.5 py-1 text-xs rounded-md bg-zinc-900 border border-zinc-700 text-zinc-100 focus:outline-none focus:border-orange-500 w-36"
-                  />
-                </div>
-
-                <div className="flex items-center gap-1.5 border-l border-zinc-800 pl-3">
-                  <button
-                    onClick={() =>
-                      onUpdateEdge(selectedEdge.id, { directed: !selectedEdge.directed })
-                    }
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs transition-colors"
-                  >
-                    <ArrowLeftRight className="w-3.5 h-3.5 text-sky-400" />
-                    {selectedEdge.directed ? 'Directed (u → v)' : 'Undirected (u — v)'}
-                  </button>
-
-                  {selectedEdge.directed && (
-                    <button
-                      onClick={() =>
-                        onUpdateEdge(selectedEdge.id, {
-                          source: selectedEdge.target,
-                          target: selectedEdge.source
-                        })
-                      }
-                      className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs transition-colors"
-                      title="Reverse Direction"
-                    >
-                      <RotateCcw className="w-3.5 h-3.5 text-amber-400" />
-                      Flip Direction
-                    </button>
-                  )}
-                </div>
-
-                <button
-                  onClick={() => {
-                    onDeleteEdge(selectedEdge.id);
-                    setSelectedEdgeId(null);
-                  }}
-                  className="ml-1 flex items-center gap-1 px-2.5 py-1 rounded-md bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 text-xs transition-colors"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  Delete
-                </button>
-              </>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Bottom-Right Telemetry Status Bar */}
-      <div className="absolute bottom-3 right-3 z-10 hidden sm:flex items-center gap-3 px-3 py-1.5 rounded-lg bg-[#141517]/90 border border-zinc-800/80 text-[11px] font-mono text-zinc-400 pointer-events-none">
-        <span>|V| = {nodes.length}</span>
-        <span className="text-zinc-700">•</span>
-        <span>|E| = {edges.length}</span>
-        {playbackMode && (
-          <>
-            <span className="text-zinc-700">•</span>
-            <span className="text-orange-400 flex items-center gap-1">
-              <Sparkles className="w-3 h-3" />
-              Active Trace: {playbackMode.toUpperCase()}
-            </span>
-          </>
-        )}
-      </div>
+          {selectedEdge && (
+            <>
+              <span className="font-mono text-zinc-400">
+                Edge {selectedEdge.source} {selectedEdge.directed ? '→' : '—'} {selectedEdge.target}
+              </span>
+              <input
+                type="text"
+                value={selectedEdge.label || ''}
+                onChange={e => onUpdateEdge(selectedEdge.id, { label: e.target.value })}
+                placeholder="Label"
+                className="px-2 py-0.5 rounded bg-zinc-950 border border-zinc-700 text-xs text-zinc-200 focus:outline-none w-24"
+              />
+              <button
+                onClick={() =>
+                  onUpdateEdge(selectedEdge.id, { directed: !selectedEdge.directed })
+                }
+                className="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-xs text-zinc-300 border border-zinc-700"
+              >
+                {selectedEdge.directed ? 'Directed' : 'Undirected'}
+              </button>
+              <button
+                onClick={() => {
+                  onDeleteEdge(selectedEdge.id);
+                  setSelectedEdgeId(null);
+                }}
+                className="px-2 py-0.5 rounded bg-zinc-800 hover:bg-rose-950 hover:text-rose-300 text-zinc-400 text-xs border border-zinc-700"
+              >
+                Delete
+              </button>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 };
