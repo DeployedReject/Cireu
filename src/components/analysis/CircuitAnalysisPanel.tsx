@@ -288,23 +288,31 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
       <div className="flex-1 overflow-y-auto p-3 space-y-3">
         {activeTab === 'eulerian' && (
           <div className="space-y-3">
-            {/* Flat diagnostic summary */}
-            <div className="p-2.5 rounded bg-zinc-900 border border-zinc-800">
+            {/* Diagnostic summary */}
+            <div
+              className={`p-2.5 rounded border ${
+                eulerian.hasEulerianCircuit
+                  ? 'bg-emerald-950/20 border-emerald-900/60'
+                  : eulerian.hasEulerianPath
+                  ? 'bg-sky-950/20 border-sky-900/60'
+                  : 'bg-zinc-900 border-zinc-800'
+              }`}
+            >
               <div className="font-semibold text-zinc-200 mb-1 flex items-center gap-1.5">
                 {eulerian.hasEulerianCircuit ? (
                   <>
                     <Check className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>Eulerian Circuit Exists</span>
+                    <span className="text-emerald-300">Eulerian Circuit Exists</span>
                   </>
                 ) : eulerian.hasEulerianPath ? (
                   <>
                     <Check className="w-3.5 h-3.5 text-sky-400" />
-                    <span>Eulerian Path Exists (No Circuit)</span>
+                    <span className="text-sky-300">Eulerian Path Exists (No Circuit)</span>
                   </>
                 ) : (
                   <>
                     <X className="w-3.5 h-3.5 text-rose-400" />
-                    <span>No Eulerian Walk</span>
+                    <span className="text-rose-300">No Eulerian Walk</span>
                   </>
                 )}
               </div>
@@ -368,22 +376,30 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
 
         {activeTab === 'hamiltonian' && (
           <div className="space-y-3">
-            <div className="p-2.5 rounded bg-zinc-900 border border-zinc-800">
+            <div
+              className={`p-2.5 rounded border ${
+                hamiltonian.hasHamiltonianCircuit
+                  ? 'bg-emerald-950/20 border-emerald-900/60'
+                  : hamiltonian.hasHamiltonianPath
+                  ? 'bg-sky-950/20 border-sky-900/60'
+                  : 'bg-zinc-900 border-zinc-800'
+              }`}
+            >
               <div className="font-semibold text-zinc-200 mb-1 flex items-center gap-1.5">
                 {hamiltonian.hasHamiltonianCircuit ? (
                   <>
                     <Check className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>Hamiltonian Circuit Exists</span>
+                    <span className="text-emerald-300">Hamiltonian Circuit Exists</span>
                   </>
                 ) : hamiltonian.hasHamiltonianPath ? (
                   <>
                     <Check className="w-3.5 h-3.5 text-sky-400" />
-                    <span>Hamiltonian Path Exists (No Circuit)</span>
+                    <span className="text-sky-300">Hamiltonian Path Exists (No Circuit)</span>
                   </>
                 ) : (
                   <>
                     <X className="w-3.5 h-3.5 text-rose-400" />
-                    <span>No Hamiltonian Walk</span>
+                    <span className="text-rose-300">No Hamiltonian Walk</span>
                   </>
                 )}
               </div>
@@ -395,13 +411,21 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
               <div className="grid grid-cols-2 gap-2 text-[11px]">
                 <div className="p-2 rounded bg-zinc-900 border border-zinc-800">
                   <span className="text-zinc-500 font-mono">Dirac</span>
-                  <div className="font-medium mt-0.5">
+                  <div
+                    className={`font-medium mt-0.5 ${
+                      hamiltonian.diracConditionSatisfied ? 'text-emerald-400' : 'text-zinc-400'
+                    }`}
+                  >
                     {hamiltonian.diracConditionSatisfied ? 'Satisfied' : 'Not met'}
                   </div>
                 </div>
                 <div className="p-2 rounded bg-zinc-900 border border-zinc-800">
                   <span className="text-zinc-500 font-mono">Ore</span>
-                  <div className="font-medium mt-0.5">
+                  <div
+                    className={`font-medium mt-0.5 ${
+                      hamiltonian.oreConditionSatisfied ? 'text-emerald-400' : 'text-zinc-400'
+                    }`}
+                  >
                     {hamiltonian.oreConditionSatisfied ? 'Satisfied' : 'Not met'}
                   </div>
                 </div>
@@ -491,12 +515,26 @@ export const CircuitAnalysisPanel: React.FC<CircuitAnalysisPanelProps> = ({
                   };
                   return (
                     <tr key={node.id}>
-                      <td className="py-1 text-zinc-200 font-bold">{node.id}</td>
+                      <td className="py-1 text-zinc-200 font-bold flex items-center gap-1.5">
+                        <span
+                          className="w-2 h-2 rounded-full inline-block shrink-0"
+                          style={{ backgroundColor: node.color || '#3b82f6' }}
+                        />
+                        <span>{node.id}</span>
+                      </td>
                       <td className="py-1 text-center text-zinc-400">{info.inDegree}</td>
                       <td className="py-1 text-center text-zinc-400">{info.outDegree}</td>
                       <td className="py-1 text-center text-zinc-200">{info.degree}</td>
-                      <td className="py-1 text-right text-zinc-400">
-                        {info.isOdd ? 'odd' : 'even'}
+                      <td className="py-1 text-right">
+                        <span
+                          className={`px-1.5 py-0.5 rounded text-[10px] ${
+                            info.isOdd
+                              ? 'bg-amber-950/60 text-amber-300 border border-amber-900/50'
+                              : 'bg-emerald-950/60 text-emerald-300 border border-emerald-900/50'
+                          }`}
+                        >
+                          {info.isOdd ? 'odd' : 'even'}
+                        </span>
                       </td>
                     </tr>
                   );
